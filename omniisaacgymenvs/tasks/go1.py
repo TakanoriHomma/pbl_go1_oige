@@ -129,7 +129,6 @@ class Go1Task(RLTask):
             joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
 
         for joint_path in joint_paths:
-            print(f"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{go1.prim_path}/{joint_path}")
             set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
             RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
@@ -138,7 +137,7 @@ class Go1Task(RLTask):
         for i in range(self.num_actions):
             name = dof_names[i]
             angle = self.named_default_joint_angles[name]
-#            self.default_dof_pos[:, i] = angle
+            self.default_dof_pos[:, i] = angle
 
     def get_observations(self) -> dict:
         torso_position, torso_rotation = self._go1s.get_world_poses(clone=False)
