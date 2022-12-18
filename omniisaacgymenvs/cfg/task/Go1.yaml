@@ -13,8 +13,8 @@ env:
   controlFrequencyInv: 2
 
   baseInitState:
-    pos: [0.0, 0.0, 0.5] # x,y,z [m]
-    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
+    pos: [0.0, 0.0, 0.7] # x,y,z [m]
+    rot: [0, 0.7070727, 0, 0.7071408] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
@@ -35,10 +35,10 @@ env:
     FR_hip_joint: 0.0
     RR_hip_joint: 0.0
 
-    FL_thigh_joint: 0.5
-    RL_thigh_joint: 0.5
-    FR_thigh_joint: 0.5
-    RR_thigh_joint: 0.5
+    FL_thigh_joint: 2.0
+    RL_thigh_joint: 2.0
+    FR_thigh_joint: 2.0
+    RR_thigh_joint: 2.0
 
     FL_calf_joint: -1.0
     RL_calf_joint: -1.0

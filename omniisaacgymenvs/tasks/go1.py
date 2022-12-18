@@ -98,7 +98,8 @@ class Go1Task(RLTask):
             self.rew_scales[key] *= self.dt
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
-        self._go1_translation = torch.tensor([0.0, 0.0, 0.5])
+        self._go1_translation = torch.tensor(pos)
+        self._go1_orientation = torch.tensor(rot)
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
         self._num_observations = 48
         self._num_actions = 12
@@ -117,7 +118,7 @@ class Go1Task(RLTask):
         return
 
     def get_go1(self):
-        go1 = Go1(prim_path=self.default_zero_env_path + "/go1", name="Go1", translation=self._go1_translation)
+        go1 = Go1(prim_path=self.default_zero_env_path + "/go1", name="Go1", translation=self._go1_translation, orientation=self._go1_orientation)
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))
 
         # Configure joint properties
@@ -285,7 +286,7 @@ class Go1Task(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.3, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.43, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 
