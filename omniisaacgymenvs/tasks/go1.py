@@ -63,16 +63,15 @@ class Go1Task(RLTask):
 
         # reward scales
         self.rew_scales = {}
-        self.rew_scales["lin_vel_xy"] = self._task_cfg["env"]["learn"]["linearVelocityXYRewardScale"]
+        self.rew_scales["lin_vel_x"] = self._task_cfg["env"]["learn"]["linearVelocityXRewardScale"]
+        self.rew_scales["lin_vel_y"] = self._task_cfg["env"]["learn"]["linearVelocityYRewardScale"]
         self.rew_scales["ang_vel_z"] = self._task_cfg["env"]["learn"]["angularVelocityZRewardScale"]
-        self.rew_scales["lin_vel_z"] = self._task_cfg["env"]["learn"]["linearVelocityZRewardScale"]
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
-        self.command_y_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_y"]
         self.command_yaw_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["yaw"]
 
         # base init state
@@ -101,7 +100,7 @@ class Go1Task(RLTask):
         self._go1_translation = torch.tensor(pos)
         self._go1_orientation = torch.tensor(rot)
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 48
+        self._num_observations = 47
         self._num_actions = 12
 
         RLTask.__init__(self, name, env)
@@ -123,14 +122,14 @@ class Go1Task(RLTask):
 
         # Configure joint properties
         joint_paths = []
-
+        
         for quadrant in ["FL", "RL", "FR", "RR"]:
             joint_paths.append(f"trunk/{quadrant}_hip_joint")
             joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
             joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
 
         for joint_path in joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 14220.0)
             RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
         self.default_dof_pos = torch.zeros((self.num_envs, 12), dtype=torch.float, device=self.device, requires_grad=False)
@@ -155,7 +154,7 @@ class Go1Task(RLTask):
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
 
         commands_scaled = self.commands * torch.tensor(
-            [self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
+            [self.lin_vel_scale, self.ang_vel_scale],
             requires_grad=False,
             device=self.commands.device,
         )
@@ -214,9 +213,6 @@ class Go1Task(RLTask):
         self.commands_x[env_ids] = torch_rand_float(
             self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
         ).squeeze()
-        self.commands_y[env_ids] = torch_rand_float(
-            self.command_y_range[0], self.command_y_range[1], (num_resets, 1), device=self._device
-        ).squeeze()
         self.commands_yaw[env_ids] = torch_rand_float(
             self.command_yaw_range[0], self.command_yaw_range[1], (num_resets, 1), device=self._device
         ).squeeze()
@@ -235,10 +231,9 @@ class Go1Task(RLTask):
         self.go1_dof_lower_limits = dof_limits[0, :, 0].to(device=self._device)
         self.go1_dof_upper_limits = dof_limits[0, :, 1].to(device=self._device)
 
-        self.commands = torch.zeros(self._num_envs, 3, dtype=torch.float, device=self._device, requires_grad=False)
-        self.commands_y = self.commands.view(self._num_envs, 3)[..., 1]
-        self.commands_x = self.commands.view(self._num_envs, 3)[..., 0]
-        self.commands_yaw = self.commands.view(self._num_envs, 3)[..., 2]
+        self.commands = torch.zeros(self._num_envs, 2, dtype=torch.float, device=self._device, requires_grad=False)
+        self.commands_x = self.commands.view(self._num_envs, 2)[..., 0]
+        self.commands_yaw = self.commands.view(self._num_envs, 2)[..., 1]
 
         # initialize some data used later on
         self.extras = {}
@@ -270,23 +265,28 @@ class Go1Task(RLTask):
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
 
         # velocity tracking reward
-        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - base_lin_vel[:, :2]), dim=1)
-        ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
-        rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
+        lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 2])  
+        ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 0])
+        rew_lin_vel_x = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_x"]
+        rew_lin_vel_y = torch.exp(torch.square(base_lin_vel[:, 2])) * self.rew_scales["lin_vel_y"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
 
-        rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"]
+        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:6] - self.default_dof_pos[:, 0:6]), dim=1) * self.rew_scales["cosmetic"]
+        
+        
+        rew_joint_acc = 0
+        rew_action_rate = 0
+        rew_cosmetic = 0
 
-        total_reward = rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_lin_vel_z
+        total_reward = rew_lin_vel_x + rew_lin_vel_y + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.43, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.42, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 
