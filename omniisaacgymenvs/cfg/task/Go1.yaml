@@ -4,7 +4,7 @@ name: Go1
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:4096,${...num_envs}}
+  numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0
@@ -19,9 +19,8 @@ env:
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
   randomCommandVelocityRanges:
-    linear_x: [-2., 2.] # min max [m/s]
-    linear_y: [-1., 1.]   # min max [m/s]
-    yaw: [-1., 1.]          # min max [rad/s]
+    linear_x: [-1.0, 2.0] # min max [m/s]
+    yaw: [0.0, 0.0]          # min max [rad/s]
 
   control:
     # PD Drive parameters:
@@ -47,16 +46,16 @@ env:
     
   learn:
     # rewards
-    linearVelocityXYRewardScale: 1.0
+    linearVelocityXRewardScale: 1.0
+    linearVelocityYRewardScale: -0.05
     angularVelocityZRewardScale: 0.5
-    linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.006
     cosmeticRewardScale: -0.06
 
     # normalization
-    linearVelocityScale: 2.0
-    angularVelocityScale: 0.25
+    linearVelocityScale: 1.0
+    angularVelocityScale: 1.0
     dofPositionScale: 1.0
     dofVelocityScale: 0.05
 
