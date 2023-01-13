@@ -1,5 +1,5 @@
 # used to create the object
-name: Go1
+name: Go1_Vertical
 
 physics_engine: ${..physics_engine}
 
