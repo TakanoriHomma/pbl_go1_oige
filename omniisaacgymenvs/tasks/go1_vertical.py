@@ -42,7 +42,7 @@ import math
 
 from omni.isaac.core.prims import RigidPrimView
 
-class Go1Task(RLTask):
+class Go1VerticalTask(RLTask):
     def __init__(
         self,
         name,
