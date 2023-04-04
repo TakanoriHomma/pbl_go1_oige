@@ -121,16 +121,21 @@ class Go1HorizontalTask(RLTask):
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))
 
         # Configure joint properties
-        joint_paths = []
-
+        large_joint_paths = []
+        small_joint_paths = []
+        
         for quadrant in ["FL", "RL", "FR", "RR"]:
-            joint_paths.append(f"trunk/{quadrant}_hip_joint")
-            joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
-            joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
+            large_joint_paths.append(f"trunk/{quadrant}_hip_joint")
+            large_joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
+        for quadrant in ["FL", "RL", "FR", "RR"]:
+            small_joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
 
-        for joint_path in joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1000)
-            RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
+        for joint_path in large_joint_paths:
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 561.69)
+        for joint_path in small_joint_paths:
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1263.8)
+
+        RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
         self.default_dof_pos = torch.zeros((self.num_envs, 12), dtype=torch.float, device=self.device, requires_grad=False)
         dof_names = go1.dof_names
