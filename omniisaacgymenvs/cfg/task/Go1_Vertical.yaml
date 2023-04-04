@@ -4,13 +4,13 @@ name: Go1_Vertical
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:8192,${...num_envs}}
+  numEnvs: ${resolve_default:4096,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0
   clipActions: 1.0
 
-  controlFrequencyInv: 2
+  controlFrequencyInv: 10
 
   baseInitState:
     pos: [0.0, 0.0, 0.7] # x,y,z [m]
@@ -19,7 +19,7 @@ env:
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
   randomCommandVelocityRanges:
-    linear_x: [-1.0, 2.0] # min max [m/s]
+    linear_x: [-1.0, 1.0] # min max [m/s]
     yaw: [0.0, 0.0]          # min max [rad/s]
 
   control:

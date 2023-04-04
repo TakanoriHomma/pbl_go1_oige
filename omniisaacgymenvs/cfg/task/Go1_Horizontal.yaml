@@ -10,7 +10,7 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  controlFrequencyInv: 2
+  controlFrequencyInv: 10
 
   baseInitState:
     pos: [0.0, 0.0, 0.5] # x,y,z [m]
@@ -48,15 +48,15 @@ env:
   learn:
     # rewards
     linearVelocityXYRewardScale: 1.0
-    angularVelocityZRewardScale: 0.5
+    angularVelocityZRewardScale: 1.0
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.006
     cosmeticRewardScale: -0.06
 
     # normalization
-    linearVelocityScale: 2.0
-    angularVelocityScale: 0.25
+    linearVelocityScale: 0.5
+    angularVelocityScale: 1.0
     dofPositionScale: 1.0
     dofVelocityScale: 0.05
 
