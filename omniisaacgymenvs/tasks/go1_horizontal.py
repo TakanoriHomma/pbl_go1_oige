@@ -125,7 +125,7 @@ class Go1HorizontalTask(RLTask):
         # Configure joint properties
         large_joint_paths = []
         small_joint_paths = []
-        
+
         for quadrant in ["FL", "RL", "FR", "RR"]:
             large_joint_paths.append(f"trunk/{quadrant}_hip_joint")
             large_joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
@@ -297,11 +297,8 @@ class Go1HorizontalTask(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-<<<<<<< HEAD
         self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.25, ground_heights=0.0)
-=======
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.3, ground_heights=0.0)
->>>>>>> b23357c3a81bde6ad23e02cafdcc5656b360ec1a
+
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 
