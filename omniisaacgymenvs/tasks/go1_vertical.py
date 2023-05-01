@@ -35,6 +35,8 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 
 from omni.isaac.core.utils.torch.rotations import *
 
+import omni.usd
+
 import numpy as np
 import torch
 import math
@@ -256,6 +258,11 @@ class Go1VerticalTask(RLTask):
         # randomize all envs
         indices = torch.arange(self._go1s.count, dtype=torch.int64, device=self._device)
         self.reset_idx(indices)
+
+        stage = omni.usd.get_context().get_stage()
+        ground_prim = stage.GetPrimAtPath("/World/defaultGroundPlane/GroundPlane/CollisionPlane")
+        ground_prim.GetAttribute("physics:collisionEnabled").Set(False)
+        ground_prim.GetAttribute("physics:collisionEnabled").Set(True)
 
     def calculate_metrics(self) -> None:
         torso_position, torso_rotation = self._go1s.get_world_poses(clone=False)
