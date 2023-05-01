@@ -35,6 +35,8 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 
 from omni.isaac.core.utils.torch.rotations import *
 
+import omni.usd
+
 import numpy as np
 import torch
 import math
@@ -261,6 +263,11 @@ class Go1HorizontalTask(RLTask):
         indices = torch.arange(self._go1s.count, dtype=torch.int64, device=self._device)
         self.reset_idx(indices)
 
+        stage = omni.usd.get_context().get_stage()
+        ground_prim = stage.GetPrimAtPath("/World/defaultGroundPlane/GroundPlane/CollisionPlane")
+        ground_prim.GetAttribute("physics:collisionEnabled").Set(False)
+        ground_prim.GetAttribute("physics:collisionEnabled").Set(True)
+
     def calculate_metrics(self) -> None:
         torso_position, torso_rotation = self._go1s.get_world_poses(clone=False)
         root_velocities = self._go1s.get_velocities(clone=False)
@@ -290,7 +297,7 @@ class Go1HorizontalTask(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.3, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.25, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 
