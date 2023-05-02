@@ -74,7 +74,6 @@ class Go1HorizontalTask(RLTask):
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
-        self.command_y_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_y"]
         self.command_yaw_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["yaw"]
 
         # base init state
@@ -220,9 +219,7 @@ class Go1HorizontalTask(RLTask):
         self.commands_x[env_ids] = torch_rand_float(
             self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
         ).squeeze()
-        self.commands_y[env_ids] = torch_rand_float(
-            self.command_y_range[0], self.command_y_range[1], (num_resets, 1), device=self._device
-        ).squeeze()
+
         self.commands_yaw[env_ids] = torch_rand_float(
             self.command_yaw_range[0], self.command_yaw_range[1], (num_resets, 1), device=self._device
         ).squeeze()
@@ -242,7 +239,6 @@ class Go1HorizontalTask(RLTask):
         self.go1_dof_upper_limits = dof_limits[0, :, 1].to(device=self._device)
 
         self.commands = torch.zeros(self._num_envs, 3, dtype=torch.float, device=self._device, requires_grad=False)
-        self.commands_y = self.commands.view(self._num_envs, 3)[..., 1]
         self.commands_x = self.commands.view(self._num_envs, 3)[..., 0]
         self.commands_yaw = self.commands.view(self._num_envs, 3)[..., 2]
 
@@ -281,7 +277,7 @@ class Go1HorizontalTask(RLTask):
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
 
         # velocity tracking reward
-        lin_vel_error = torch.sum(torch.square(self.commands[:, :2] - base_lin_vel[:, :2]), dim=1)
+        lin_vel_error = torch.sum(torch.square(self.commands[:, :0] - base_lin_vel[:, :0]), dim=1)
         ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
         rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]

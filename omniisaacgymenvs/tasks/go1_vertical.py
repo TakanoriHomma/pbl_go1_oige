@@ -66,7 +66,6 @@ class Go1VerticalTask(RLTask):
         # reward scales
         self.rew_scales = {}
         self.rew_scales["lin_vel_x"] = self._task_cfg["env"]["learn"]["linearVelocityXRewardScale"]
-        self.rew_scales["lin_vel_y"] = self._task_cfg["env"]["learn"]["linearVelocityYRewardScale"]
         self.rew_scales["ang_vel_z"] = self._task_cfg["env"]["learn"]["angularVelocityZRewardScale"]
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
@@ -280,7 +279,6 @@ class Go1VerticalTask(RLTask):
         lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 2])  
         ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 0])
         rew_lin_vel_x = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_x"]
-        rew_lin_vel_y = torch.exp(torch.square(base_lin_vel[:, 2])) * self.rew_scales["lin_vel_y"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
 
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
@@ -292,7 +290,7 @@ class Go1VerticalTask(RLTask):
         rew_action_rate = 0
         rew_cosmetic = 0
 
-        total_reward = rew_lin_vel_x + rew_lin_vel_y + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
+        total_reward = rew_lin_vel_x + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
