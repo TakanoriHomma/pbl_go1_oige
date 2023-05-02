@@ -19,8 +19,8 @@ env:
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 
   randomCommandVelocityRanges:
-    linear_x: [-1.0, 1.0] # min max [m/s]
-    yaw: [0.0, 0.0]          # min max [rad/s]
+    linear_x: [-1., 1.] # min max [m/s]
+    yaw: [-1., 1.]          # min max [rad/s]
 
   control:
     # PD Drive parameters:
@@ -47,7 +47,6 @@ env:
   learn:
     # rewards
     linearVelocityXRewardScale: 1.0
-    linearVelocityYRewardScale: -0.05
     angularVelocityZRewardScale: 0.5
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.006
