@@ -10,7 +10,7 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  controlFrequencyInv: 10
+  controlFrequencyInv: 5 #DAVE # 10hz
 
   baseInitState:
     pos: [0.0, 0.0, 0.7] # x,y,z [m]
@@ -23,10 +23,10 @@ env:
     yaw: [-1., 1.]          # min max [rad/s]
 
   control:
-    # PD Drive parameters:
-    stiffness: 85.0  # [N*m/rad]
-    damping: 2.0     # [N*m*s/rad]
-    actionScale: 13.5
+    # PD Drive parameters: #DAVE
+    stiffness: 20.0  # [N*m/rad]
+    damping: 1.0     # [N*m*s/rad]
+    actionScale: 50 
 
   defaultJointAngles:  # = target angles when action = 0.0
     FL_hip_joint: 0.0
@@ -46,8 +46,8 @@ env:
     
   learn:
     # rewards
-    linearVelocityXRewardScale: 1.0
-    angularVelocityZRewardScale: 0.5
+    linearVelocityXRewardScale: 10.0
+    angularVelocityZRewardScale: 10.0
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.006
     cosmeticRewardScale: -0.06

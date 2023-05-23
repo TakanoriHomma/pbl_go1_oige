@@ -19,11 +19,11 @@ params:
           name: default
         sigma_init:
           name: const_initializer
-          val: 0. # std = 1.
+          val: 1. # std = 1.
         fixed_sigma: True
 
     mlp:
-      units: [512, 256, 128, 64]
+      units: [512, 256, 128]
       activation: elu
       d2rl: False
 
