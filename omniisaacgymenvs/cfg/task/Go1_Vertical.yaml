@@ -24,7 +24,7 @@ env:
 
   control:
     # PD Drive parameters: #DAVE
-    stiffness: 20.0  # [N*m/rad]
+    stiffness: 10.0  # [N*m/rad]
     damping: 1.0     # [N*m*s/rad]
     actionScale: 50 
 

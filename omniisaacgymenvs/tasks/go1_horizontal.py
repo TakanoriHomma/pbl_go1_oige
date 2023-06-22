@@ -71,6 +71,7 @@ class Go1HorizontalTask(RLTask):
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
+        self.rew_scales["body_cosmetic"] = self._task_cfg["env"]["learn"]["bodyCosmeticRewardScale"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -132,9 +133,9 @@ class Go1HorizontalTask(RLTask):
             small_joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
 
         for joint_path in large_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 561.69)
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 561.69) #DAVE
         for joint_path in small_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, 400, 40, 1263.8)
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 1263.8)
 
         RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
@@ -277,7 +278,7 @@ class Go1HorizontalTask(RLTask):
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
 
         # velocity tracking reward
-        lin_vel_error = torch.sum(torch.square(self.commands[:, :0] - base_lin_vel[:, :0]), dim=1)
+        lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 0])
         ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
         rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
@@ -285,15 +286,16 @@ class Go1HorizontalTask(RLTask):
         rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"]
+        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:8] - self.default_dof_pos[:, 0:8]), dim=1) * self.rew_scales["cosmetic"]
+        rew_body_cosmetic = torch.sum(torch.abs(torso_rotation[:, 1:3]), dim=1) * self.rew_scales["body_cosmetic"]
 
-        total_reward = rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_lin_vel_z
+        total_reward = rew_lin_vel_z + rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_body_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.25, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.26, ground_heights=0.0)
 
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()

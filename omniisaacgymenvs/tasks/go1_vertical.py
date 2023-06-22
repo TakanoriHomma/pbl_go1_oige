@@ -104,9 +104,6 @@ class Go1VerticalTask(RLTask):
         self._num_observations = 47
         self._num_actions = 12
 
-        self.stiffness = self._task_cfg["env"]["control"]["stiffness"]
-        self.damping = self._task_cfg["env"]["control"]["damping"]
-
         RLTask.__init__(self, name, env)
         return
 
@@ -134,13 +131,10 @@ class Go1VerticalTask(RLTask):
         for quadrant in ["FL", "RL", "FR", "RR"]:
             small_joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
 
-
-
-
         for joint_path in large_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.stiffness, self.damping, 561.69) #DAVE
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 561.69) #DAVE
         for joint_path in small_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.stiffness, self.damping, 1263.8)
+            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 1263.8)
 
         RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
@@ -289,11 +283,7 @@ class Go1VerticalTask(RLTask):
 
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:6] - self.default_dof_pos[:, 0:6]), dim=1) * self.rew_scales["cosmetic"]
-        
-        rew_joint_acc = 0
-        rew_action_rate = 0
-        rew_cosmetic = 0
+        rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:12] - self.default_dof_pos[:, 0:12]), dim=1) * self.rew_scales["cosmetic"]
 
         total_reward = rew_lin_vel_x + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
