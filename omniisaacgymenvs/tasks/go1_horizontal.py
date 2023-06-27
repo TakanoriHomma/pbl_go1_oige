@@ -102,7 +102,7 @@ class Go1HorizontalTask(RLTask):
         self._num_envs = self._task_cfg["env"]["numEnvs"]
         self._go1_translation = torch.tensor([0.0, 0.0, 0.5])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 48
+        self._num_observations = 44
         self._num_actions = 12
 
         RLTask.__init__(self, name, env)
@@ -152,23 +152,23 @@ class Go1HorizontalTask(RLTask):
         dof_pos = self._go1s.get_joint_positions(clone=False)
         dof_vel = self._go1s.get_joint_velocities(clone=False)
 
-        velocity = root_velocities[:, 0:3]
+        #velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
 
-        base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
+        #base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
 
         commands_scaled = self.commands * torch.tensor(
-            [self.lin_vel_scale, self.lin_vel_scale, self.ang_vel_scale],
+            [self.lin_vel_scale, self.ang_vel_scale],
             requires_grad=False,
             device=self.commands.device,
         )
 
         obs = torch.cat(
             (
-                base_lin_vel,
+                #base_lin_vel,
                 base_ang_vel,
                 projected_gravity,
                 commands_scaled,
@@ -239,9 +239,9 @@ class Go1HorizontalTask(RLTask):
         self.go1_dof_lower_limits = dof_limits[0, :, 0].to(device=self._device)
         self.go1_dof_upper_limits = dof_limits[0, :, 1].to(device=self._device)
 
-        self.commands = torch.zeros(self._num_envs, 3, dtype=torch.float, device=self._device, requires_grad=False)
-        self.commands_x = self.commands.view(self._num_envs, 3)[..., 0]
-        self.commands_yaw = self.commands.view(self._num_envs, 3)[..., 2]
+        self.commands = torch.zeros(self._num_envs, 2, dtype=torch.float, device=self._device, requires_grad=False)
+        self.commands_x = self.commands.view(self._num_envs, 2)[..., 0]
+        self.commands_yaw = self.commands.view(self._num_envs, 2)[..., 1]
 
         # initialize some data used later on
         self.extras = {}
@@ -279,7 +279,7 @@ class Go1HorizontalTask(RLTask):
 
         # velocity tracking reward
         lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 0])
-        ang_vel_error = torch.square(self.commands[:, 2] - base_ang_vel[:, 2])
+        ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 1])
         rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
 
