@@ -157,6 +157,8 @@ class Go1HorizontalTask(RLTask):
 
         #base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
+        print(torso_rotation.shape)
+        print(self.gravity_vec.shape)
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
 
@@ -179,7 +181,7 @@ class Go1HorizontalTask(RLTask):
             dim=-1,
         )
         self.obs_buf[:] = obs
-
+        
         observations = {
             self._go1s.name: {
                 "obs_buf": self.obs_buf
