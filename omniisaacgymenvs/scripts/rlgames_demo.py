@@ -45,7 +45,6 @@ class RLGDemo(RLGTrainer):
     def __init__(self, cfg, cfg_dict):
         RLGTrainer.__init__(self, cfg, cfg_dict)
         self.cfg.test = True
-    
 
 @hydra.main(config_name="config", config_path="../cfg")
 def parse_hydra_configs(cfg: DictConfig):

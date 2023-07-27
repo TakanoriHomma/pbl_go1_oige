@@ -83,7 +83,6 @@ class RLGTrainer():
             'sigma': None
         })
 
-
 @hydra.main(config_name="config", config_path="../cfg")
 def parse_hydra_configs(cfg: DictConfig):
 
