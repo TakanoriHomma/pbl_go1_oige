@@ -10,7 +10,7 @@ env:
   clipObservations: 5.0
   clipActions: 1.0
 
-  controlFrequencyInv: 5 #DAVE # 12hz
+  controlFrequencyInv: 2 #DAVE # 30Hz
 
   baseInitState:
     pos: [0.0, 0.0, 0.7] # x,y,z [m]
@@ -24,8 +24,8 @@ env:
 
   control:
     # PD Drive parameters: #DAVE
-    stiffness: 50.0  # [N*m/rad]
-    damping: 5.0     # [N*m*s/rad]
+    stiffness: 30.0  # [N*m/rad]
+    damping: 3.0     # [N*m*s/rad]
     actionScale: 50 
 
   defaultJointAngles:  # = target angles when action = 0.0
