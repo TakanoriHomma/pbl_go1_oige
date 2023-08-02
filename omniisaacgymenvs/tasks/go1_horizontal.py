@@ -297,7 +297,7 @@ class Go1HorizontalTask(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.26, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.25, ground_heights=0.0)
 
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
