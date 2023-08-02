@@ -283,7 +283,9 @@ class Go1VerticalTask(RLTask):
 
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
+        # Currently broken because of joint reordering
         rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 4:12] - self.default_dof_pos[:, 4:12]), dim=1) * self.rew_scales["cosmetic"]
+        rew_cosmetic = 0
 
         total_reward = rew_lin_vel_x + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)

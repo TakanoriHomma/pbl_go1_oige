@@ -69,18 +69,18 @@ class Go1(Robot):
             articulation_controller=None,
         )
 
-        self._dof_names = ["RR_hip_joint",
-                           "RL_hip_joint",
-                           "FL_hip_joint",
-                           "FR_hip_joint",
-                           "FL_thigh_joint",
+        self._dof_names = ["FR_hip_joint",
                            "FR_thigh_joint",
-                           "RL_thigh_joint",
-                           "RR_thigh_joint",
-                           "FL_calf_joint",
-                           "RL_calf_joint",
                            "FR_calf_joint",
-                           "RR_calf_joint"]
+                           "FL_hip_joint",
+                           "FL_thigh_joint",
+                           "FL_calf_joint",
+                           "RR_hip_joint",
+                           "RR_thigh_joint",
+                           "RR_calf_joint",
+                           "RL_hip_joint",
+                           "RL_thigh_joint",
+                           "RL_calf_joint"]
                            
     @property
     def dof_names(self):

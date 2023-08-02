@@ -286,9 +286,11 @@ class Go1HorizontalTask(RLTask):
         rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
+        # Currently broken because of joint reordering
         rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:8] - self.default_dof_pos[:, 0:8]), dim=1) * self.rew_scales["cosmetic"]
         rew_body_cosmetic = torch.sum(torch.abs(torso_rotation[:, 1:3]), dim=1) * self.rew_scales["body_cosmetic"]
 
+        rew_cosmetic = 0
         total_reward = rew_lin_vel_z + rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_body_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
 
