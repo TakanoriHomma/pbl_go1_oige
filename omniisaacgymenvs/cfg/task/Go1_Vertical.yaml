@@ -13,7 +13,7 @@ env:
   controlFrequencyInv: 2 #DAVE # 30Hz
 
   baseInitState:
-    pos: [0.0, 0.0, 0.7] # x,y,z [m]
+    pos: [0.0, 0.0, 0.6] # x,y,z [m]
     rot: [0, 0.7070727, 0, 0.7071408] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -34,15 +34,15 @@ env:
     FR_hip_joint: 0.0
     RR_hip_joint: 0.0
 
-    FL_thigh_joint: 2.0
-    RL_thigh_joint: 2.0
-    FR_thigh_joint: 2.0
-    RR_thigh_joint: 2.0
+    FL_thigh_joint: 2.4
+    RL_thigh_joint: 2.4
+    FR_thigh_joint: 2.4
+    RR_thigh_joint: 2.4
 
-    FL_calf_joint: -1.0
-    RL_calf_joint: -1.0
-    FR_calf_joint: -1.0
-    RR_calf_joint: -1.0
+    FL_calf_joint: -1.5
+    RL_calf_joint: -1.5
+    FR_calf_joint: -1.5
+    RR_calf_joint: -1.5
     
   learn:
     # rewards
@@ -60,6 +60,8 @@ env:
 
     # episode length in seconds
     episodeLength_s: 50
+
+    min_body_height: 0.4
 
 sim:
   dt: 0.01

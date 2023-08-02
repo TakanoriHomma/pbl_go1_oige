@@ -13,7 +13,7 @@ env:
   controlFrequencyInv: 2 #DAVE # 30Hz
 
   baseInitState:
-    pos: [0.0, 0.0, 0.5] # x,y,z [m]
+    pos: [0.0, 0.0, 0.4] # x,y,z [m]
     rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
@@ -51,7 +51,7 @@ env:
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.006
-    cosmeticRewardScale: -0.1
+    cosmeticRewardScale: -0.2
     bodyCosmeticRewardScale: -1.0
 
     # normalization
@@ -62,6 +62,8 @@ env:
 
     # episode length in seconds
     episodeLength_s: 50
+
+    min_body_height: 0.2
 
 sim:
   dt: 0.01
