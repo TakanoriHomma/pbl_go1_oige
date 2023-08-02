@@ -34,15 +34,15 @@ env:
     FR_hip_joint: 0.0
     RR_hip_joint: 0.0
 
-    FL_thigh_joint: 0.7
-    RL_thigh_joint: 0.7
-    FR_thigh_joint: 0.7
-    RR_thigh_joint: 0.7
+    FL_thigh_joint: 0.85
+    RL_thigh_joint: 0.85
+    FR_thigh_joint: 0.85
+    RR_thigh_joint: 0.85
 
-    FL_calf_joint: -1.2
-    RL_calf_joint: -1.2
-    FR_calf_joint: -1.2
-    RR_calf_joint: -1.2
+    FL_calf_joint: -1.5
+    RL_calf_joint: -1.5
+    FR_calf_joint: -1.5
+    RR_calf_joint: -1.5
     
   learn:
     # rewards
