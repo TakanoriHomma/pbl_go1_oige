@@ -70,6 +70,7 @@ class Go1VerticalTask(RLTask):
         self.rew_scales["joint_acc"] = self._task_cfg["env"]["learn"]["jointAccRewardScale"]
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
+        self.min_body_height = self._task_cfg["env"]["learn"]["min_body_height"]
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -283,17 +284,16 @@ class Go1VerticalTask(RLTask):
 
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
-        # Currently broken because of joint reordering
         rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 4:12] - self.default_dof_pos[:, 4:12]), dim=1) * self.rew_scales["cosmetic"]
         rew_cosmetic = 0
-
+        
         total_reward = rew_lin_vel_x + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
 
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=0.42, ground_heights=0.0)
+        self.fallen_over = self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 
