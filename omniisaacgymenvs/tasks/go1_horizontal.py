@@ -157,8 +157,6 @@ class Go1HorizontalTask(RLTask):
 
         #base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
-        print(torso_rotation.shape)
-        print(self.gravity_vec.shape)
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
 
@@ -181,7 +179,7 @@ class Go1HorizontalTask(RLTask):
             dim=-1,
         )
         self.obs_buf[:] = obs
-        
+
         observations = {
             self._go1s.name: {
                 "obs_buf": self.obs_buf
@@ -196,7 +194,7 @@ class Go1HorizontalTask(RLTask):
 
         indices = torch.arange(self._go1s.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        current_targets = self.current_targets + self.action_scale * self.actions * self.dt 
+        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
         self.current_targets[:] = torch.clamp(current_targets, self.go1_dof_lower_limits, self.go1_dof_upper_limits)
         self._go1s.set_joint_position_targets(self.current_targets, indices)
 

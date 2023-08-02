@@ -124,7 +124,7 @@ class Go1VerticalTask(RLTask):
         # Configure joint properties
         large_joint_paths = []
         small_joint_paths = []
-        
+
         for quadrant in ["FL", "RL", "FR", "RR"]:
             large_joint_paths.append(f"trunk/{quadrant}_hip_joint")
             large_joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
