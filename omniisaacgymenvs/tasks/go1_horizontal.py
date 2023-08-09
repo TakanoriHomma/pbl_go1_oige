@@ -194,6 +194,7 @@ class Go1HorizontalTask(RLTask):
 
         indices = torch.arange(self._go1s.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
+
         current_targets = self.current_targets + self.action_scale * self.actions * self.dt
         self.current_targets[:] = torch.clamp(current_targets, self.go1_dof_lower_limits, self.go1_dof_upper_limits)
         self._go1s.set_joint_position_targets(self.current_targets, indices)

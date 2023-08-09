@@ -104,7 +104,7 @@ def save_onnx_checkpoint(filename, model, obs_shape, device, states):
         traced = torch.jit.trace(adapter, adapter.flattened_inputs, check_trace=False)
         flattened_outputs = traced(*adapter.flattened_inputs)
 
-        torch.onnx.export(traced, *adapter.flattened_inputs, filename + ".onnx", verbose=False, input_names=['obs'], output_names=['mu','log_std', 'value'])
+        torch.onnx.export(traced, *adapter.flattened_inputs, filename + ".onnx", verbose=False, input_names=['obs'], output_names=['actions'])
 
 def load_checkpoint(filename):
     print("=> loading checkpoint '{}'".format(filename))
