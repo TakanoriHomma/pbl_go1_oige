@@ -36,7 +36,6 @@ from omni.isaac.core.utils.prims import get_prim_at_path
 from omni.isaac.core.utils.torch.rotations import *
 
 import omni.usd
-
 import numpy as np
 import torch
 import math
@@ -90,7 +89,7 @@ class Go1HorizontalTask(RLTask):
         self.named_default_joint_angles = self._task_cfg["env"]["defaultJointAngles"]
 
         # other
-        self.dt = 1 / 60
+        self.dt = self._task_cfg["sim"]["dt"]
         self.max_episode_length_s = self._task_cfg["env"]["learn"]["episodeLength_s"]
         self.max_episode_length = int(self.max_episode_length_s / self.dt + 0.5)
         self.Kp = self._task_cfg["env"]["control"]["stiffness"]
