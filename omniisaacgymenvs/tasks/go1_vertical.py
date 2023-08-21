@@ -89,7 +89,7 @@ class Go1VerticalTask(RLTask):
         self.named_default_joint_angles = self._task_cfg["env"]["defaultJointAngles"]
 
         # other
-        self.dt = 1.0 / 60.0
+        self.dt = self._task_cfg["sim"]["dt"]
         self.max_episode_length_s = self._task_cfg["env"]["learn"]["episodeLength_s"]
         self.max_episode_length = int(self.max_episode_length_s / self.dt + 0.5)
         self.Kp = self._task_cfg["env"]["control"]["stiffness"]
