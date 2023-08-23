@@ -122,19 +122,10 @@ class Go1HorizontalTask(RLTask):
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))
 
         # Configure joint properties
-        large_joint_paths = []
-        small_joint_paths = []
-
         for quadrant in ["FL", "RL", "FR", "RR"]:
-            large_joint_paths.append(f"trunk/{quadrant}_hip_joint")
-            large_joint_paths.append(f"{quadrant}_hip/{quadrant}_thigh_joint")
-        for quadrant in ["FL", "RL", "FR", "RR"]:
-            small_joint_paths.append(f"{quadrant}_thigh/{quadrant}_calf_joint")
-
-        for joint_path in large_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 561.69)
-        for joint_path in small_joint_paths:
-            set_drive(f"{go1.prim_path}/{joint_path}", "angular", "position", 0, self.Kp, self.Kd, 1263.8)
+            set_drive(f"{go1.prim_path}/trunk/{quadrant}_hip_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
+            set_drive(f"{go1.prim_path}/{quadrant}_hip/{quadrant}_thigh_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
+            set_drive(f"{go1.prim_path}/{quadrant}_thigh/{quadrant}_calf_joint", "angular", "position", 0, self.Kp, self.Kd, 35.55)
 
         RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
@@ -279,7 +270,7 @@ class Go1HorizontalTask(RLTask):
 
         # velocity tracking reward
         lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 0])
-        ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 1])
+        ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 2])
         rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
 
