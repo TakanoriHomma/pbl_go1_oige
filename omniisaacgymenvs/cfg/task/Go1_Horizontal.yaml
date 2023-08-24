@@ -23,10 +23,10 @@ env:
     yaw: [-1.0, 1.0]          # min max [rad/s]
 
   control:
-    # PD Drive parameters: #DAVE
+    # PD Drive parameters: 
     stiffness: 30.0  # [N*m/rad]
     damping: 3.0     # [N*m*s/rad]
-    actionScale: 15
+    actionScale: 0.1
 
   defaultJointAngles:  # = target angles when action = 0.0
     FL_hip_joint: 0.0
@@ -50,7 +50,7 @@ env:
     angularVelocityZRewardScale: 1.0
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
-    actionRateRewardScale: -0.006
+    actionRateRewardScale: -0.005
     cosmeticRewardScale: -0.2
     bodyCosmeticRewardScale: -1.0
 

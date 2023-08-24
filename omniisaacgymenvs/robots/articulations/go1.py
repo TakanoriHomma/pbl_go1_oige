@@ -58,7 +58,9 @@ class Go1(Robot):
             assets_root_path = get_assets_root_path()
             if assets_root_path is None:
                 carb.log_error("Could not find nucleus server with /Isaac folder")
-            self._usd_path = assets_root_path + "/Isaac/Robots/Unitree/go1.usd"
+
+#            self._usd_path = assets_root_path + "/Isaac/Robots/Unitree/go1.usd"  # Default NVidia
+            self._usd_path = "omniverse://localhost/Projects/Biped/go1.usd"       # Local Version
         add_reference_to_stage(self._usd_path, prim_path)
 
         super().__init__(
@@ -81,7 +83,7 @@ class Go1(Robot):
                            "FR_calf_joint",
                            "RL_calf_joint",
                            "RR_calf_joint"]
-                           
+
     @property
     def dof_names(self):
         return self._dof_names
