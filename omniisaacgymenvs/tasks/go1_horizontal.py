@@ -122,10 +122,10 @@ class Go1HorizontalTask(RLTask):
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))
 
         # Configure joint properties
-        for quadrant in ["FL", "RL", "FR", "RR"]:
-            set_drive(f"{go1.prim_path}/trunk/{quadrant}_hip_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
-            set_drive(f"{go1.prim_path}/{quadrant}_hip/{quadrant}_thigh_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
-            set_drive(f"{go1.prim_path}/{quadrant}_thigh/{quadrant}_calf_joint", "angular", "position", 0, self.Kp, self.Kd, 35.55)
+        #for quadrant in ["FL", "RL", "FR", "RR"]:
+        #    set_drive(f"{go1.prim_path}/trunk/{quadrant}_hip_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
+        #    set_drive(f"{go1.prim_path}/{quadrant}_hip/{quadrant}_thigh_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
+        #    set_drive(f"{go1.prim_path}/{quadrant}_thigh/{quadrant}_calf_joint", "angular", "position", 0, self.Kp, self.Kd, 35.55)
 
         RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
 
@@ -184,8 +184,8 @@ class Go1HorizontalTask(RLTask):
 
         indices = torch.arange(self._go1s.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-
-        current_targets = self.current_targets + self.action_scale * self.actions * self.dt
+        
+        current_targets = self.current_targets + self.action_scale * self.actions
         self.current_targets[:] = torch.clamp(current_targets, self.go1_dof_lower_limits, self.go1_dof_upper_limits)
         self._go1s.set_joint_position_targets(self.current_targets, indices)
 
