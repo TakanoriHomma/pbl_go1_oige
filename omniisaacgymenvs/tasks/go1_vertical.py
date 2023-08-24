@@ -41,7 +41,6 @@ import numpy as np
 import torch
 import math
 
-
 from omni.isaac.core.prims import RigidPrimView
 
 class Go1VerticalTask(RLTask):
@@ -143,10 +142,8 @@ class Go1VerticalTask(RLTask):
         dof_pos = self._go1s.get_joint_positions(clone=False)
         dof_vel = self._go1s.get_joint_velocities(clone=False)
 
-        #velocity = root_velocities[:, 0:3]
         ang_velocity = root_velocities[:, 3:6]
 
-        #base_lin_vel = quat_rotate_inverse(torso_rotation, velocity) * self.lin_vel_scale
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
@@ -159,7 +156,6 @@ class Go1VerticalTask(RLTask):
 
         obs = torch.cat(
             (
-                #base_lin_vel,
                 base_ang_vel,
                 projected_gravity,
                 commands_scaled,
@@ -185,7 +181,7 @@ class Go1VerticalTask(RLTask):
 
         indices = torch.arange(self._go1s.count, dtype=torch.int32, device=self._device)
         self.actions[:] = actions.clone().to(self._device)
-        current_targets = self.current_targets + self.action_scale * self.actions * self.dt 
+        current_targets = self.current_targets + self.action_scale * self.actions
         self.current_targets[:] = torch.clamp(current_targets, self.go1_dof_lower_limits, self.go1_dof_upper_limits)
         self._go1s.set_joint_position_targets(self.current_targets, indices)
 
