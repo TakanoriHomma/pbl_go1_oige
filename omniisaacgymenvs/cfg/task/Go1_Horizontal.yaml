@@ -125,3 +125,34 @@ sim:
     # per-shape
     contact_offset: 0.02
     rest_offset: 0.0
+
+domain_randomization:
+  randomize: True
+  min_frequency: 720
+  randomization_params:
+    observations:
+      on_reset:
+        operation: "additive"
+        distribution: "gaussian"
+        distribution_parameters: [0, .0001]
+    simulation:
+      gravity:
+        on_interval:
+          frequency_interval: 720
+          operation: "additive"
+          distribution: "gaussian"
+          distribution_parameters: [[0.0, 0.0, 0.0], [0.0, 0.0, 0.4]]
+    rigid_prim_views:
+        mass:
+          on_reset:
+            operation: "scaling"
+            distribution: "uniform"
+            distribution_parameters: [0.8, 1.2]
+    articulation_views:
+      go1view:
+        material_properties:
+          on_reset:
+            num_buckets: 250
+            operation: "scaling"
+            distribution: "uniform"
+            distribution_parameters: [[0.7, 1, 1], [1.3, 1, 1]]
