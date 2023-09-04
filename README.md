@@ -2,6 +2,9 @@
 Project Besed Learning - Go1 - Omniverse Isaac Gym Envs
 
 ## How to use  
+- Please check the following site and run all commands to install NVIDIA Container Toolkit and generate NGC API Key.  
+https://docs.omniverse.nvidia.com/isaacsim/latest/install_container.html
+
 - Go to ```/Docker``` directory and run ```/Docker/build.sh``` file. And then, run ```/run.sh```.
 
 - Automatically you can enter the docker container. Go to ```/isaac-sim/OmniIsaacGymEnvs``` directory.
