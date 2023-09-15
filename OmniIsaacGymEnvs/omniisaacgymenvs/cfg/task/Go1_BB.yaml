@@ -1,10 +1,10 @@
 # used to create the object
-name: Go1_Horizontal
+name: Go1_BB
 
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:256,${...num_envs}}
+  numEnvs: ${resolve_default:2,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0

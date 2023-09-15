@@ -31,17 +31,12 @@ from typing import Optional
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
 
-from omni.isaac.sensor import Camera
-import omni.isaac.core.utils.numpy.rotations as rot_utils
-import quaternion
 
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
-
-class Go1View(ArticulationView):
+class BBView(RigidPrimView):
     def __init__(
         self,
         prim_paths_expr: str,
-        name: Optional[str] = "Go1View",
+        name: Optional[str] = "BBView",
     ) -> None:
         """[summary]
         """
@@ -52,9 +47,8 @@ class Go1View(ArticulationView):
             reset_xform_properties=False
         )
 
-        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/trunk", name="base_view", reset_xform_properties=False)
-        self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
-    
+        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/bb", name="base_bb_view", reset_xform_properties=False)
+
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
 
