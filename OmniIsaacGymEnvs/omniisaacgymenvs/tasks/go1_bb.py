@@ -136,36 +136,6 @@ class Go1BBTask(RLTask):
         self._go1s = Go1View(prim_paths_expr="/World/envs/.*/go1", name="go1view")
         self._bbs = BBView(prim_paths_expr="/World/envs/.*/bb", name="bbview") # setting bb view
         
-        # print("******************************")
-        # print("Get Current Stage...")
-        # print(get_current_stage())
-        # print("******************************")
-        # print("Get Prim At Path...")
-        # print(print(Usd.Stage.GetPrimAtPath('/World/envs/.*/go1')))
-        # print("******************************")
-        # camera = UsdGeom.Camera.Define(get_current_stage(), '/World/envs/env_0/go1/camera')
-        
-        # self.camera = Camera(
-        #     prim_path="/World/envs/env_0/go1/camera_rearDown/camera",
-        #     position=np.array([0.0, 0.0, 25.0]),
-        #     frequency=20,
-        #     resolution=(256, 256),
-        #     # orientation=rot_utils.euler_angles_to_quats(np.array([0, 90, 0]), degrees=True),
-        # )
-        
-        # print("******************************")
-        # print("Initialize Camera...")
-        # print("******************************")
-        # self.camera.initialize()
-        # print("Add Motion Vectors To Frame...")
-        # print("******************************")
-        # self.camera.add_motion_vectors_to_frame()
-        
-        # self.frames = []
-        # self.num_frames = 1000
-        # self.current_num_frames = 0
-        
-        
         self.camera = UnitreeVision(
                                     # prim_path="/World/go1",
                                     prim_path="/World/envs/env_1/go1/camera_optical_chin", 
@@ -181,9 +151,6 @@ class Go1BBTask(RLTask):
         scene.add(self._go1s)
         scene.add(self._go1s._base)
         scene.add(self._go1s._knees)
-        
-
-        # scene.add(self.camera)
         scene.add(self._bbs) # adding
         # scene.add(self._bbs._base) # adding
         # scene.add(self._bbs._knees) # adding
@@ -191,7 +158,7 @@ class Go1BBTask(RLTask):
         return
 
     def get_go1(self):
-        go1 = Go1(prim_path=self.default_zero_env_path + "/go1", name="Go1", translation=self._go1_translation, usd_path="/isaac-sim/OmniIsaacGymEnvs/omniisaacgymenvs/USD/go1.usda")
+        go1 = Go1(prim_path=self.default_zero_env_path + "/go1", name="Go1", translation=self._go1_translation, usd_path="/isaac-sim/OmniIsaacGymEnvs/omniisaacgymenvs/USD/go1.usd")
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))        
   
         # Configure joint properties
@@ -390,23 +357,6 @@ class Go1BBTask(RLTask):
 
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
-        
-        # # for getting image from camera 
-        # imgplot = plt.imshow(self.camera.get_rgba()[:, :, :3])
-        # self.frames.append([imgplot])
-        # self.current_num_frames += 1
-        # # plt.show()
-        # # print(self.camera.get_current_frame()["motion_vectors"])
-        # if self.current_num_frames == self.num_frames :
-        #     # 描画
-        #     fig = plt.figure()
-        #     # グラフの設定
-        #     plt.axes().set_aspect('equal')
-        #     plt.xlim(-1.5, 1.5)
-        #     plt.ylim(-1.5, 1.5)
-        #     ani = ArtistAnimation(fig, self.frames, interval=100)
-        #     ani.save('circle_ani.gif')
-        #     print("saved!")
 
     def is_done(self) -> None:
         # reset agents

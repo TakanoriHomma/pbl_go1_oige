@@ -54,20 +54,7 @@ class Go1View(ArticulationView):
 
         self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/trunk", name="base_view", reset_xform_properties=False)
         self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
-        
-        # self._chin_cameras = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/camera_rearDown/camera", name="camera_rearDown", reset_xform_properties=False)
-        # self.camera = UnitreeVision(prim_path = prim_paths_expr,
-        #                             name = name,
-        #                             # physics_dt: Optional[float] = 1 / 400.0,
-        #                             # usd_path = self._usd_path,
-        #                             #position: Optional[np.ndarray] = None,
-        #                             #orientation: Optional[np.ndarray] = None,
-        #                             model = "Go1",
-        #                             is_ros2 = False,
-        #                             # way_points: Optional[np.ndarray] = None,
-        #                             )
-        
-
+    
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
 

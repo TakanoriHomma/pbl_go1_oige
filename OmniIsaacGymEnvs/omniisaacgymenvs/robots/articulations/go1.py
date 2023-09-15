@@ -85,19 +85,7 @@ class Go1(Robot):
                            "FR_calf_joint",
                            "RL_calf_joint",
                            "RR_calf_joint"]
-
-        # self.camera = UnitreeVision(prim_path = prim_path,
-        #                             name = name,
-        #                             # physics_dt: Optional[float] = 1 / 400.0,
-        #                             usd_path = self._usd_path,
-        #                             #position: Optional[np.ndarray] = None,
-        #                             #orientation: Optional[np.ndarray] = None,
-        #                             model = "Go1",
-        #                             is_ros2 = False,
-        #                             # way_points: Optional[np.ndarray] = None,
-        #                             )
-        
-        
+          
     @property
     def dof_names(self):
         return self._dof_names

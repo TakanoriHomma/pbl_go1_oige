@@ -1,25 +1,71 @@
 #usda 1.0
 
-# bb means Balance Beam
-def Xform "BB"
+def Xform "bb_description" (
+    apiSchemas = ["PhysicsArticulationRootAPI", "PhysxArticulationAPI"]
+)
 {
-    double3 xformOp:translate = (0.0, 0.0, 0.0)
-    double3 xformOp:rotateXYZ = (0.0, 0.0, 0.0)
-    double3 xformOp:scale = (1.0, 1.0, 1.0)
-
-    def PhysicsXform "PhysicsBox"
+    def Scope "Looks"
     {
-        uniform double mass = 1.0  # 質量を設定します（ここでは1.0kgとしています）
+        def Material "material_red"
+            {
+                token outputs:mdl:displacement.connect = </go1_description/Looks/material_red/Shader.outputs:out>
+                token outputs:mdl:surface.connect = </go1_description/Looks/material_red/Shader.outputs:out>
+                token outputs:mdl:volume.connect = </go1_description/Looks/material_red/Shader.outputs:out>
 
-        def Mesh "BBMesh"
+                def Shader "Shader"
+                {
+                    uniform token info:implementationSource = "sourceAsset"
+                    uniform asset info:mdl:sourceAsset = @OmniPBR.mdl@
+                    uniform token info:mdl:sourceAsset:subIdentifier = "OmniPBR"
+                    color3f inputs:diffuse_color_constant = (0.8, 0, 0) (
+                        customData = {
+                            float3 default = (0.2, 0.2, 0.2)
+                        }
+                        displayGroup = "Albedo"
+                        displayName = "Albedo Color"
+                        doc = "This is the albedo base color"
+                        hidden = false
+                    )
+                    token outputs:out
+                }
+            }
+    }
+
+    def Xform "box" (
+        apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        vector3f physics:angularVelocity = (0, 0, 0)
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.000001, 0.000001, 0.000001)
+        float physics:mass = 0.00001
+        vector3f physics:velocity = (0, 0, 0)
+        quatd xformOp:orient = (0.0922961911344169, -0.7010573572667613, 0.7010573572667612, 0.09229613613997349)
+        double3 xformOp:scale = (3.0, 0.2, 0.05)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Mesh "visuals"
         {
-            int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
-            int[] faceVertexIndices = [0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 5, 4, 1, 2, 6, 5, 2, 3, 7, 6, 3, 0, 4, 7]
-            point3f[] points = [(0.0, 0.0, 0.0), (0.05, 0.0, 0.0), (0.05, 0.10, 0.0), (0.0, 0.10, 0.0),
-                                (0.0, 0.0, 3.0), (0.05, 0.0, 3.0), (0.05, 0.10, 3.0), (0.0, 0.10, 3.0)]
-            normal3f[] normals = [(0.0, 0.0, -1.0), (0.0, 0.0, 1.0),
-                                  (0.0, -1.0, 0.0), (0.0, 1.0, 0.0),
-                                  (-1.0, 0.0, 0.0), (1.0, 0.0, 0.0)]
+            float3[] extent = [(-1.5, -0.1, -0.025), (1.5, 0.1, 0.025)]
+            uniform token subdivisionScheme = "bilinear"
+            quatd xformOp:orient = (1, 0, 0, 0)
+            double3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+        }
+
+        def Cube "collisions" (
+            apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            float3[] extent = [(-1.5, -0.1, -0.025), (1.5, 0.1, 0.025)]
+            uniform token purpose = "guide"
+            double size = 1
+            quatd xformOp:orient = (1, 0, 0, 0)
+            double3 xformOp:scale = (1, 1, 1)
+            double3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
         }
     }
 }
