@@ -34,18 +34,16 @@ from omni.isaac.core.robots.robot import Robot
 from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
-
 import numpy as np
 import torch
 
 from pxr import PhysxSchema
 
-class Go1(Robot):
+class BB(Robot):
     def __init__(
         self,
         prim_path: str,
-        name: Optional[str] = "Go1",
+        name: Optional[str] = "BB",
         usd_path: Optional[str] = None,
         translation: Optional[np.ndarray] = None,
         orientation: Optional[np.ndarray] = None,
@@ -61,8 +59,11 @@ class Go1(Robot):
             if assets_root_path is None:
                 carb.log_error("Could not find nucleus server with /Isaac folder")
 
-#            self._usd_path = assets_root_path + "/Isaac/Robots/Unitree/go1.usd"  # Default NVidia
-            self._usd_path = "omniverse://localhost/Projects/Biped/go1.usd"       # Local Version
+#            self._usd_path = assets_root_path + "/Isaac/Robots/Unitree/bb.usd"  # Default NVidia
+            self._usd_path = "omniverse://localhost/Projects/Biped/bb.usd"       # Local Version 
+            #
+            # no such a file bb.usd on omniverse://localhost/Projects/Biped/ but first of all we will designate the path when call this class
+            #
         add_reference_to_stage(self._usd_path, prim_path)
 
         super().__init__(
@@ -72,32 +73,3 @@ class Go1(Robot):
             orientation=orientation,
             articulation_controller=None,
         )
-
-        self._dof_names = ["FL_hip_joint",
-                           "FR_hip_joint",
-                           "RL_hip_joint",
-                           "RR_hip_joint",
-                           "FL_thigh_joint",
-                           "FR_thigh_joint",
-                           "RL_thigh_joint",
-                           "RR_thigh_joint",
-                           "FL_calf_joint",
-                           "FR_calf_joint",
-                           "RL_calf_joint",
-                           "RR_calf_joint"]
-
-        # self.camera = UnitreeVision(prim_path = prim_path,
-        #                             name = name,
-        #                             # physics_dt: Optional[float] = 1 / 400.0,
-        #                             usd_path = self._usd_path,
-        #                             #position: Optional[np.ndarray] = None,
-        #                             #orientation: Optional[np.ndarray] = None,
-        #                             model = "Go1",
-        #                             is_ros2 = False,
-        #                             # way_points: Optional[np.ndarray] = None,
-        #                             )
-        
-        
-    @property
-    def dof_names(self):
-        return self._dof_names

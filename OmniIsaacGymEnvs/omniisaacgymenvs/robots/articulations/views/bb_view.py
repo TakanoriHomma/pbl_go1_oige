@@ -31,17 +31,12 @@ from typing import Optional
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
 
-from omni.isaac.sensor import Camera
-import omni.isaac.core.utils.numpy.rotations as rot_utils
-import quaternion
 
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
-
-class Go1View(ArticulationView):
+class BBView(RigidPrimView):
     def __init__(
         self,
         prim_paths_expr: str,
-        name: Optional[str] = "Go1View",
+        name: Optional[str] = "BBView",
     ) -> None:
         """[summary]
         """
@@ -52,21 +47,7 @@ class Go1View(ArticulationView):
             reset_xform_properties=False
         )
 
-        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/trunk", name="base_view", reset_xform_properties=False)
-        self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
-        
-        # self._chin_cameras = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/camera_rearDown/camera", name="camera_rearDown", reset_xform_properties=False)
-        # self.camera = UnitreeVision(prim_path = prim_paths_expr,
-        #                             name = name,
-        #                             # physics_dt: Optional[float] = 1 / 400.0,
-        #                             # usd_path = self._usd_path,
-        #                             #position: Optional[np.ndarray] = None,
-        #                             #orientation: Optional[np.ndarray] = None,
-        #                             model = "Go1",
-        #                             is_ros2 = False,
-        #                             # way_points: Optional[np.ndarray] = None,
-        #                             )
-        
+        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/bb", name="base_bb_view", reset_xform_properties=False)
 
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
