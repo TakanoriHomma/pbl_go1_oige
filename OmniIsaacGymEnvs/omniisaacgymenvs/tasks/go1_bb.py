@@ -55,7 +55,8 @@ from pxr import Usd, UsdGeom, Sdf
 from omni.isaac.core.prims import RigidPrimView
 
 # Go1/A1にカメラを設置するためのモジュール群
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
+# from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
+from omniisaacgymenvs.exts.unitree_vision2 import UnitreeVision2
 import omni.graph.core as og
 from omni.isaac.core.utils.extensions import enable_extension 
 # enable ROS bridge extension
@@ -135,19 +136,21 @@ class Go1BBTask(RLTask):
         super().set_up_scene(scene)
         self._go1s = Go1View(prim_paths_expr="/World/envs/.*/go1", name="go1view")
         self._bbs = BBView(prim_paths_expr="/World/envs/.*/bb", name="bbview") # setting bb view
-        
-        self.camera = UnitreeVision(
-                                    # prim_path="/World/go1",
-                                    prim_path="/World/envs/env_1/go1/camera_optical_chin", 
-                                    name="Go1", 
-                                    position=np.array([0, 0, 0.27]), 
-                                    orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
-                                    physics_dt=1 / 400.0, 
-                                    model="Go1",
-                                    camera_position= np.array([0.2693, 0.025, 0.067]),
-                                    camera_degree=np.array([90, 0, -90]),  
-                                )
-        
+    
+        for i in range(self._num_envs):
+            self.camera_0 = UnitreeVision2(
+                                            prim_path="/World/envs/env_" + str(i) + "/go1/camera_optical_chin", 
+                                            # prim_path="/World/envs/env_0/go1/camera_optical_chin", 
+                                            index=i,
+                                            name="Go1", 
+                                            position=np.array([0, 0, 0.27]), 
+                                            orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
+                                            physics_dt=1 / 400.0, 
+                                            model="Go1",
+                                            camera_position= np.array([.0, .0, -0.9]),
+                                            camera_degree=(180, 0, -180),  
+                                        )
+
         scene.add(self._go1s)
         scene.add(self._go1s._base)
         scene.add(self._go1s._knees)
@@ -321,7 +324,7 @@ class Go1BBTask(RLTask):
         ground_prim.GetAttribute("physics:collisionEnabled").Set(False)
         ground_prim.GetAttribute("physics:collisionEnabled").Set(True)
         
-        print(self.camera.cameras)
+        # print(self.camera.cameras)
 
     def calculate_metrics(self) -> None:
         torso_position, torso_rotation = self._go1s.get_world_poses(clone=False)
