@@ -147,7 +147,7 @@ class Go1BBTask(RLTask):
                                             orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
                                             physics_dt=1 / 400.0, 
                                             model="Go1",
-                                            camera_position= np.array([.0, .0, -0.9]),
+                                            camera_position= np.array([.0, .0, -0.8]),
                                             camera_degree=(180, 0, -180),  
                                         )
 
