@@ -67,8 +67,8 @@ class UnitreeVision2(Unitree):
         """
         super().__init__(prim_path, name, physics_dt, usd_path, position, orientation, model, way_points)
 
-        self.image_width = 640
-        self.image_height = 480
+        self.image_width = 232
+        self.image_height = 200
         
         self.index=index
         self.enable_viewport=enable_viewport
@@ -81,16 +81,16 @@ class UnitreeVision2(Unitree):
                 21, 
                 16, 
                 "perspective", 
-                24, 
-                400),
+                64, # 24 
+                0.1), # 400
             ("/camera_right", 
                 Gf.Vec3d(camera_position[0]-0.05, camera_position[1], camera_position[2]),
                 camera_degree, 
                 21, 
                 16, 
                 "perspective", 
-                24, 
-                400),
+                64, 
+                0.1),
         ]
         self.camera_graphs = []
 
