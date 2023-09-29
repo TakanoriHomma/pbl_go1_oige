@@ -22,7 +22,7 @@ from omni.isaac.core.utils.viewports import set_camera_view
 from omni.kit.viewport.utility import get_active_viewport, get_viewport_from_window_name
 from omni.isaac.core.utils.prims import set_targets
 
-
+# 並列化のため，UnitreeVisionを改造
 class UnitreeVision2(Unitree):
     """[Summary]
     
@@ -32,6 +32,7 @@ class UnitreeVision2(Unitree):
     def __init__(
         self,
         prim_path: str,
+        index,
         name: str = "unitree_quadruped",
         physics_dt: Optional[float] = 1 / 400.0,
         usd_path: Optional[str] = None,
@@ -40,6 +41,9 @@ class UnitreeVision2(Unitree):
         model: Optional[str] = "A1",
         is_ros2: Optional[bool] = False,
         way_points: Optional[np.ndarray] = None,
+        camera_position: np.ndarray = np.array([0.2693, 0.025, 0.067]),
+        camera_degree: tuple = (180, 0, -180),  
+        enable_viewport: Optional[bool] = True,
     ) -> None:
         """
         [Summary]
@@ -48,6 +52,7 @@ class UnitreeVision2(Unitree):
         
         Arguments:
             prim_path {str} -- prim path of the robot on the stage
+            index
             name {str} -- name of the quadruped
             physics_dt {float} -- physics downtime of the controller
             usd_path {str} -- robot usd filepath in the directory
@@ -55,23 +60,44 @@ class UnitreeVision2(Unitree):
             orientation {np.ndarray} -- orientation of the robot
             model {str} -- robot model (can be either A1 or Go1)
             way_points {np.ndarray} -- waypoints for the robot
+            camera_position
+            camera_degree
+            enable_viewport
 
         """
         super().__init__(prim_path, name, physics_dt, usd_path, position, orientation, model, way_points)
 
         self.image_width = 640
         self.image_height = 480
-
+        
+        self.index=index
+        self.enable_viewport=enable_viewport
+        
         self.cameras = [
             # 0name, 1offset, 2orientation, 3hori aperture, 4vert aperture, 5projection, 6focal length, 7focus distance
-            ("/camera_left", Gf.Vec3d(0.2693, 0.025, 0.067), (90, 0, -90), 21, 16, "perspective", 24, 400),
-            ("/camera_right", Gf.Vec3d(0.2693, -0.025, 0.067), (90, 0, -90), 21, 16, "perspective", 24, 400),
+            ("/camera_left", 
+                Gf.Vec3d(camera_position[0], camera_position[1], camera_position[2]), 
+                camera_degree, 
+                21, 
+                16, 
+                "perspective", 
+                24, 
+                400),
+            ("/camera_right", 
+                Gf.Vec3d(camera_position[0]-0.05, camera_position[1], camera_position[2]),
+                camera_degree, 
+                21, 
+                16, 
+                "perspective", 
+                24, 
+                400),
         ]
         self.camera_graphs = []
 
         # after stage is defined
         self._stage = omni.usd.get_context().get_stage()
 
+        # indexの値でviewportの番号とかを調整する必要あり
         # add cameras on the imu link
         for i in range(len(self.cameras)):
             # add camera prim
@@ -97,9 +123,9 @@ class UnitreeVision2(Unitree):
                 ros_bridge_version = "ros2_bridge."
 
             # Creating an on-demand push graph with cameraHelper nodes to generate ROS image publishers
-
+            # ROS使うときにこの辺もindex踏まえてパス名かぶらないように調整いるかも？
             keys = og.Controller.Keys
-            graph_path = "/ROS_" + camera[0].split("/")[-1]
+            graph_path = "/ROS_" + camera[0].split("/")[-1] + "_" + str(self.index)
             (camera_graph, _, _, _) = og.Controller.edit(
                 {
                     "graph_path": graph_path,
@@ -130,7 +156,7 @@ class UnitreeVision2(Unitree):
                         ("getRenderProduct.outputs:renderProductPath", "cameraHelperInfo.inputs:renderProductPath"),
                     ],
                     keys.SET_VALUES: [
-                        ("createViewport.inputs:name", "Viewport " + str(i + self.ros_vp_offset)),
+                        ("createViewport.inputs:name", "Viewport " + str((i + self.ros_vp_offset)+(self.index*2))),
                         ("setViewportResolution.inputs:height", int(self.image_height)),
                         ("setViewportResolution.inputs:width", int(self.image_width)),
                         ("cameraHelperRgb.inputs:frameId", camera[0]),
@@ -152,9 +178,10 @@ class UnitreeVision2(Unitree):
 
             self.camera_graphs.append(camera_graph)
 
+
         self.viewports = []
 
-        for viewport_name in ["Viewport", "Viewport 1", "Viewport 2"]:
+        for viewport_name in ["Viewport", "Viewport "+str(1+self.index*2), "Viewport "+str(2+self.index*2)]:
             viewport_api = get_viewport_from_window_name(viewport_name)
             self.viewports.append(viewport_api)
 
@@ -171,8 +198,8 @@ class UnitreeVision2(Unitree):
         set_camera_view(eye=[3.0, 3.0, 3.0], target=[0, 0, 0], camera_prim_path="/OmniverseKit_Persp")
 
         main_viewport = omni.ui.Workspace.get_window("Viewport")
-        left_camera_viewport = omni.ui.Workspace.get_window("Viewport 1")
-        right_camera_viewport = omni.ui.Workspace.get_window("Viewport 2")
+        left_camera_viewport = omni.ui.Workspace.get_window("Viewport "+str(1+self.index*2))
+        right_camera_viewport = omni.ui.Workspace.get_window("Viewport "+str(2+self.index*2))
         if main_viewport is not None and left_camera_viewport is not None and right_camera_viewport is not None:
             left_camera_viewport.dock_in(main_viewport, omni.ui.DockPosition.RIGHT, 2 / 3.0)
             right_camera_viewport.dock_in(left_camera_viewport, omni.ui.DockPosition.RIGHT, 0.5)

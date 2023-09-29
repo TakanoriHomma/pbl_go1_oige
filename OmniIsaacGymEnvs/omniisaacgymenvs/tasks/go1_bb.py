@@ -137,32 +137,19 @@ class Go1BBTask(RLTask):
         self._go1s = Go1View(prim_paths_expr="/World/envs/.*/go1", name="go1view")
         self._bbs = BBView(prim_paths_expr="/World/envs/.*/bb", name="bbview") # setting bb view
     
-        # for i in range(self._num_envs):
-        self.camera_0 = UnitreeVision2(
-                                        # prim_path="/World/go1",
-                                        # prim_path="/World/envs/env_" + str(i) + "/go1/camera_optical_chin", 
-                                        prim_path="/World/envs/env_0/go1/camera_optical_chin", 
-                                        name="Go1", 
-                                        position=np.array([0, 0, 0.27]), 
-                                        orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
-                                        physics_dt=1 / 400.0, 
-                                        model="Go1",
-                                        #camera_position= np.array([0.2693, 0.025, 0.067]),
-                                        #camera_degree=np.array([90, 0, -90]),  
-                                    )
-        
-        # self.camera_1 = UnitreeVision(
-        #                         # prim_path="/World/go1",
-        #                         # prim_path="/World/envs/env_" + str(i) + "/go1/camera_optical_chin", 
-        #                         prim_path="/World/envs/env_1/go1/camera_optical_chin", 
-        #                         name="Go1", 
-        #                         position=np.array([0, 0, 0.27]), 
-        #                         orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
-        #                         physics_dt=1 / 400.0, 
-        #                         model="Go1",
-        #                         #camera_position= np.array([0.2693, 0.025, 0.067]),
-        #                         #camera_degree=np.array([90, 0, -90]),  
-        #                     )
+        for i in range(self._num_envs):
+            self.camera_0 = UnitreeVision2(
+                                            prim_path="/World/envs/env_" + str(i) + "/go1/camera_optical_chin", 
+                                            # prim_path="/World/envs/env_0/go1/camera_optical_chin", 
+                                            index=i,
+                                            name="Go1", 
+                                            position=np.array([0, 0, 0.27]), 
+                                            orientation = rot_utils.euler_angles_to_quats(np.array([90, 0, 90]), degrees=True),
+                                            physics_dt=1 / 400.0, 
+                                            model="Go1",
+                                            camera_position= np.array([.0, .0, -0.9]),
+                                            camera_degree=(180, 0, -180),  
+                                        )
         
 
         scene.add(self._go1s)
