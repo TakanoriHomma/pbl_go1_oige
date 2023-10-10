@@ -103,7 +103,7 @@ class Go1HorizontalTask(RLTask):
         self._num_envs = self._task_cfg["env"]["numEnvs"]
         self._go1_translation = torch.tensor([0.0, 0.0, 0.4])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 44
+        self._num_observations = 38 #44
         self._num_actions = 12
 
         RLTask.__init__(self, name, env)
