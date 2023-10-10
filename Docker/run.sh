@@ -50,4 +50,4 @@ docker run \
   -e DISPLAY=$DISPLAY \
   -e NVIDIA_VISIBLE_DEVICES=all \
   -e NVIDIA_DRIVER_CAPABILITIES=all \
-  -it --rm --name "go1-isaacgym-docker" go1-isaacgym-docker:2023.9.1
+  -it --name "go1-isaacgym-docker" go1-isaacgym-docker:2023.9.1

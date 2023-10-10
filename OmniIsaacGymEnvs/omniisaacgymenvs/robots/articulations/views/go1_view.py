@@ -31,11 +31,6 @@ from typing import Optional
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
 
-from omni.isaac.sensor import Camera
-import omni.isaac.core.utils.numpy.rotations as rot_utils
-import quaternion
-
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
 
 class Go1View(ArticulationView):
     def __init__(
@@ -54,17 +49,34 @@ class Go1View(ArticulationView):
 
         self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/trunk", name="base_view", reset_xform_properties=False)
         self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
-    
+
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
-
+    
     def is_knee_below_threshold(self, threshold, ground_heights=None):
         knee_pos, _ = self._knees.get_world_poses()
         knee_heights = knee_pos.view((-1, 4, 3))[:, :, 2]
         if ground_heights is not None:
             knee_heights -= ground_heights
-        return (knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (knee_heights[:, 2] < threshold) | (knee_heights[:, 3] < threshold)
+        # print(knee_heights)
+        # print((knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (knee_heights[:, 2] < threshold) | (knee_heights[:, 3]< threshold))
+        return (knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (knee_heights[:, 2] < threshold) | (knee_heights[:, 3]< threshold)
 
+    def for_debug(self):
+        knee_pos, _ = self._knees.get_world_poses()
+        print(knee_pos.view((-1, 4, 3)))
+        return 0
+
+    def is_knee_under_line(self, threshold):
+        knee_pos, _ = self._knees.get_world_poses()
+        knee_heights = knee_pos.view((-1, 4, 3))[:, :, 1]
+        # print("standard:",knee_heights)
+        knee_heights =torch.abs(torch.abs(knee_heights)- torch.abs(self.basic.view(-1,1)))
+        # print("basic",self.basic.view(-1,1))
+        # print("after:",knee_heights)
+        return (knee_heights[:, 0] > threshold) | (knee_heights[:, 1] > threshold) | (knee_heights[:, 2] > threshold) | (knee_heights[:, 3] > threshold)
+
+    
     def is_base_below_threshold(self, threshold, ground_heights):
         base_pos, _ = self.get_world_poses()
         base_heights = base_pos[:, 2]
