@@ -51,7 +51,7 @@ env:
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.005
-    cosmeticRewardScale: -0.2
+    cosmeticRewardScale: -2.0
     bodyCosmeticRewardScale: -1.0
     kneePosRewardScale: -1.1
 
@@ -78,8 +78,8 @@ sim:
   enable_cameras: False
 
   default_physics_material:
-    static_friction: 1.0
-    dynamic_friction: 1.0
+    static_friction: 5.0
+    dynamic_friction: 5.0
     restitution: 0.0
 
   physx:

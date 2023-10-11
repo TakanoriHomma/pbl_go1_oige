@@ -283,7 +283,7 @@ class Go1HorizontalTask(RLTask):
         rew_body_cosmetic = torch.sum(torch.abs(torso_rotation[:, 1:3]), dim=1) * self.rew_scales["body_cosmetic"]
 
         #knee
-        target_angle=-0.15 ##0.2max0.35
+        target_angle=-0.18 ##0.2max0.35
         knee_angles_error = dof_pos[:, 0:4] - torch.tensor([target_angle, -target_angle, target_angle, -target_angle], device=dof_pos.device)
         rew_knee_pos = torch.sum(torch.square(knee_angles_error), dim=1) * self.rew_scales["knee_pos"]
 
@@ -294,7 +294,7 @@ class Go1HorizontalTask(RLTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
         # self.fallen_over=self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
-        self.fallen_over= self._go1s.is_knee_under_line(threshold=0.15)|self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
+        self.fallen_over= self._go1s.is_knee_under_line(threshold=0.2)|self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /isaac-sim/OmniIsaacGymEnvs/unitree_ws/devel/setup.sh

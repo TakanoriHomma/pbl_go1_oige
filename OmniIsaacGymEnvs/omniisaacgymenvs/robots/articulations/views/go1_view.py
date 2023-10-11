@@ -25,7 +25,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+import torch
 from typing import Optional
 
 from omni.isaac.core.articulations import ArticulationView
@@ -49,6 +49,8 @@ class Go1View(ArticulationView):
 
         self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/trunk", name="base_view", reset_xform_properties=False)
         self._knees = RigidPrimView(prim_paths_expr="/World/envs/.*/go1/.*_calf", name="knees_view", reset_xform_properties=False)
+        base_pos, _ = self.get_world_poses()
+        self.basic=base_pos[:, 1]
 
     def get_knee_transforms(self):
         return self._knees.get_world_poses()
