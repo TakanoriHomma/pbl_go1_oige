@@ -5,3 +5,6 @@ omniisaacgymenvs.egg-info/
 checkpoints
 omniisaacgymenvs/wandb
 .vscode
+unitree_ws/devel/
+unitree_ws/build/
+unitree_ws/logs/
