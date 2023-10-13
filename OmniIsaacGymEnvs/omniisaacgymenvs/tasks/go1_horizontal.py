@@ -38,9 +38,34 @@ from omni.isaac.core.utils.torch.rotations import *
 import omni.usd
 import numpy as np
 import torch
+import torchgeometry as tgm
 import math
 
 from omni.isaac.core.prims import RigidPrimView
+
+def quaternion_to_euler(quaternion):
+    """Convert Quaternion to Euler Angles using the following equations:
+    https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    """
+    w, x, y, z = quaternion.unbind(-1)
+    
+    sinr_cosp = 2.0 * (w * x + y * z)
+    cosr_cosp = 1.0 - 2.0 * (x**2 + y**2)
+    roll = torch.atan2(sinr_cosp, cosr_cosp)
+    
+    sinp = 2.0 * (w * y - z * x)
+    pitch = torch.where(
+        torch.abs(sinp) >= 1,
+        torch.sign(sinp) * torch.tensor(3.14159265359/2, device=sinp.device),  # use 90 degrees
+        torch.asin(sinp)
+    )
+    
+    siny_cosp = 2.0 * (w * z + x * y)
+    cosy_cosp = 1.0 - 2.0 * (y**2 + z**2)
+    yaw = torch.atan2(siny_cosp, cosy_cosp)
+    
+    return roll, pitch, yaw
+
 
 class Go1HorizontalTask(RLTask):
     def __init__(
@@ -150,6 +175,7 @@ class Go1HorizontalTask(RLTask):
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
+        eular_xy= torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,:2]
 
         commands_scaled = self.commands * torch.tensor(
             [self.lin_vel_scale, self.ang_vel_scale],
@@ -162,10 +188,11 @@ class Go1HorizontalTask(RLTask):
                 #base_lin_vel,
                 # base_ang_vel,
                 # projected_gravity,
-                commands_scaled,
-                dof_pos_scaled,
-                dof_vel * self.dof_vel_scale,
-                self.actions,
+                # commands_scaled, #12
+                eular_xy, #2
+                dof_pos_scaled, #12
+                dof_vel * self.dof_vel_scale, #12
+                self.actions,  #12
             ),
             dim=-1,
         )
@@ -212,7 +239,7 @@ class Go1HorizontalTask(RLTask):
         # self.commands_x[env_ids] = torch_rand_float(
         #     self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
         # ).squeeze()
-        self.commands_x[env_ids] = 0.4
+        self.commands_x[env_ids] = 0.6 ##required speed
         # self.commands_yaw[env_ids] = torch_rand_float(
         #     self.command_yaw_range[0], self.command_yaw_range[1], (num_resets, 1), device=self._device
         # ).squeeze()

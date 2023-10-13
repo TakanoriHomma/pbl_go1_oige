@@ -4,7 +4,7 @@ name: Go1_Horizontal
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:2048,${...num_envs}}
+  numEnvs: ${resolve_default:1024,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0
