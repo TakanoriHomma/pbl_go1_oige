@@ -48,6 +48,7 @@ def initialize_task(config, env, init_sim=True):
     from omniisaacgymenvs.tasks.go1_vertical import Go1VerticalTask
     from omniisaacgymenvs.tasks.go1_bb import Go1BBTask
     
+    from omniisaacgymenvs.tasks.a1 import A1Task
     
     # Mappings from strings to environments
     task_map = {
@@ -69,6 +70,7 @@ def initialize_task(config, env, init_sim=True):
         "Go1_Horizontal": Go1HorizontalTask,
         "Go1_Vertical": Go1VerticalTask,
         "Go1_BB": Go1BBTask,
+        "A1": A1Task,
     }
 
     cfg = sim_config.config
