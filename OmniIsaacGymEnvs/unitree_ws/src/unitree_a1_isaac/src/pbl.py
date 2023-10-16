@@ -216,7 +216,20 @@ class GymCommands():
         self.default_dof_pos = [ 
                     0.1, -0.1, 0.1, -0.1,
                     0.8, 0.8, 0.8, 0.8,
-                    -1.5, -1.5, -1.5, -1.5]        
+                    -1.5, -1.5, -1.5, -1.5]     
+
+        self.clip=[(-0.2,0.2),
+                   (-0.2,0.2),
+                   (-0.2,0.2),
+                   (-0.2,0.2),
+                   (0.5,1.2),
+                   (0.5,1.2),
+                   (0.5,1.2),
+                   (0.5,1.2),
+                   (-1.2,-1.8),
+                   (-1.2,-1.8),
+                   (-1.2,-1.8),
+                   (-1.2,-1.8)]
 
         robot_name = "a1"
 
@@ -292,6 +305,9 @@ class GymCommands():
             q[9] = _q[2]
             q[10] = _q[6]
             q[11] = _q[10]
+
+
+            q=self.clip_action(q)
 
 
 
@@ -401,6 +417,11 @@ class GymCommands():
             unitree_publisher.publish_commands(FRhip, FRthigh, FRcalf, FLhip, FLthigh, FLcalf, RRhip, RRthigh, RRcalf, RLhip, RLthigh, RLcalf)
             rate.sleep()
 
+    def clip_action(self, q):
+        for i, clip,q_i in enumerate(zip(self.clip,q)):
+            q[i] = np.clip(q_i, clip[0], clip[1])
+        return q
+    
     def imuCallback(self,msg):
         self.gym_cmd.imu.quaternion[0] = msg.orientation.w
         self.gym_cmd.imu.quaternion[1] = msg.orientation.x
@@ -461,6 +482,7 @@ class GymCommands():
         euler = r.as_euler('xyz', degrees=False)
         
         return euler
+    
     def state_callback(self, msg):
         self.torso_rw = msg.imu.quaternion[0]
         self.torso_rx = msg.imu.quaternion[1]

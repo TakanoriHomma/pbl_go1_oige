@@ -47,9 +47,9 @@
           respawn="false" output="screen">
         <remap from="/joint_states" to="/$(arg rname)_gazebo/joint_states"/>
     </node>
-
+    <node pkg="my_camera_subscriber" type="camera_subscriber.py" name="camera_filter" output="screen"/>
     <!-- <node pkg="unitree_gazebo" type="servo" name="servo" required="true" output="screen"/> -->
-
+    <!-- <node name="spawn_beam" pkg="unitree_gazebo" type="spawn_beam.py" output="screen" /> -->
     <!-- load the parameter unitree_controller -->
     <include file="$(find unitree_controller)/launch/set_ctrl.launch">
         <arg name="rname" value="$(arg rname)"/>

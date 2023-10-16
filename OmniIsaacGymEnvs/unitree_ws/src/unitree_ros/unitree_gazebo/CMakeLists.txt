@@ -42,6 +42,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 #   ${catkin_LIBRARIES} ${EXTRA_LIBS}
 # )
 
+catkin_install_python(PROGRAMS
+  src/spawn_beam.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 add_library(unitreeFootContactPlugin SHARED plugin/foot_contact_plugin.cc)
 target_link_libraries(unitreeFootContactPlugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
