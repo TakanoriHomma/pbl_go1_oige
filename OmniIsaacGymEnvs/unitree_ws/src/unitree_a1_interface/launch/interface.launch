@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <rosparam ns="unitree_a1_interface" command="load" file="$(find unitree_a1_interface)/config/param.yaml"/>
+  <node name="unitree_a1_interface" pkg="unitree_a1_interface" type="ros_execute.py" output='screen'/>
+</launch>
+

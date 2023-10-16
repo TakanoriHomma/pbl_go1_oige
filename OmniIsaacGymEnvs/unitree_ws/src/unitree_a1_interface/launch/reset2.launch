@@ -1,0 +1,9 @@
+<launch>
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+    <!-- Set trunk and joint positions at startup -->
+    <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" output="screen"
+          args="-urdf -z 0.65    
+          -P -1.4
+        
+          -model a1_gazebo -param robot_description -unpause"/>
+</launch>

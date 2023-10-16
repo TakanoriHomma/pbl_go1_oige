@@ -1,0 +1,5 @@
+<?xml version='1.0'?>
+<launch>
+    <node pkg='loco_transformer' name='loco_transformer' type='ros_execute.py'/>
+    <node pkg='rviz' name='rviz' type='rviz' args='-d $(find loco_transformer)/config/setting.rviz'/>
+</launch>
