@@ -4,7 +4,7 @@ name: Go1_Horizontal
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:256,${...num_envs}}
+  numEnvs: ${resolve_default:1024,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0
@@ -29,10 +29,10 @@ env:
     actionScale: 0.2
 
   defaultJointAngles:  # = target angles when action = 0.0
-    FL_hip_joint: 0.0
-    RL_hip_joint: 0.0
-    FR_hip_joint: 0.0
-    RR_hip_joint: 0.0
+    FL_hip_joint: -0.25
+    RL_hip_joint: -0.25
+    FR_hip_joint: 0.25
+    RR_hip_joint: 0.25
 
     FL_thigh_joint: 0.85
     RL_thigh_joint: 0.85
@@ -46,13 +46,14 @@ env:
     
   learn:
     # rewards
-    linearVelocityXYRewardScale: 1.0
-    angularVelocityZRewardScale: 1.0
+    linearVelocityXYRewardScale: 5.0
+    angularVelocityZRewardScale: 0.01
     linearVelocityZRewardScale: -0.03
     jointAccRewardScale: -0.0003
     actionRateRewardScale: -0.005
-    cosmeticRewardScale: -0.2
+    cosmeticRewardScale: -2.0
     bodyCosmeticRewardScale: -1.0
+    kneePosRewardScale: -1.1
 
     # normalization
     linearVelocityScale: 1.0
@@ -77,8 +78,8 @@ sim:
   enable_cameras: False
 
   default_physics_material:
-    static_friction: 1.0
-    dynamic_friction: 1.0
+    static_friction: 5.0
+    dynamic_friction: 5.0
     restitution: 0.0
 
   physx:

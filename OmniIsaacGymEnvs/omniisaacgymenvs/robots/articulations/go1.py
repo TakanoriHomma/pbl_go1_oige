@@ -34,8 +34,6 @@ from omni.isaac.core.robots.robot import Robot
 from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
 
-from omni.isaac.quadruped.robots.unitree_vision import UnitreeVision
-
 import numpy as np
 import torch
 
@@ -85,7 +83,7 @@ class Go1(Robot):
                            "FR_calf_joint",
                            "RL_calf_joint",
                            "RR_calf_joint"]
-          
+
     @property
     def dof_names(self):
         return self._dof_names

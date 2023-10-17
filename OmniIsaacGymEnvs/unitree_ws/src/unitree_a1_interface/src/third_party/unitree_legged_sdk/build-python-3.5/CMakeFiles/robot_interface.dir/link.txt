@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O3  -shared  -o robot_interface.cpython-35m-x86_64-linux-gnu.so CMakeFiles/robot_interface.dir/python_interface.cpp.o  -L/home/unitree/catkin_ws/src/unitree_a1_interface/src/third_party/unitree_legged_sdk/lib -pthread -lunitree_legged_sdk_amd64 -llcm -flto -Wl,-rpath,/home/unitree/catkin_ws/src/unitree_a1_interface/src/third_party/unitree_legged_sdk/lib 

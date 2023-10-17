@@ -38,9 +38,34 @@ from omni.isaac.core.utils.torch.rotations import *
 import omni.usd
 import numpy as np
 import torch
+import torchgeometry as tgm
 import math
 
 from omni.isaac.core.prims import RigidPrimView
+
+def quaternion_to_euler(quaternion):
+    """Convert Quaternion to Euler Angles using the following equations:
+    https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    """
+    w, x, y, z = quaternion.unbind(-1)
+    
+    sinr_cosp = 2.0 * (w * x + y * z)
+    cosr_cosp = 1.0 - 2.0 * (x**2 + y**2)
+    roll = torch.atan2(sinr_cosp, cosr_cosp)
+    
+    sinp = 2.0 * (w * y - z * x)
+    pitch = torch.where(
+        torch.abs(sinp) >= 1,
+        torch.sign(sinp) * torch.tensor(3.14159265359/2, device=sinp.device),  # use 90 degrees
+        torch.asin(sinp)
+    )
+    
+    siny_cosp = 2.0 * (w * z + x * y)
+    cosy_cosp = 1.0 - 2.0 * (y**2 + z**2)
+    yaw = torch.atan2(siny_cosp, cosy_cosp)
+    
+    return roll, pitch, yaw
+
 
 class Go1HorizontalTask(RLTask):
     def __init__(
@@ -70,7 +95,9 @@ class Go1HorizontalTask(RLTask):
         self.rew_scales["action_rate"] = self._task_cfg["env"]["learn"]["actionRateRewardScale"]
         self.rew_scales["cosmetic"] = self._task_cfg["env"]["learn"]["cosmeticRewardScale"]
         self.rew_scales["body_cosmetic"] = self._task_cfg["env"]["learn"]["bodyCosmeticRewardScale"]
+        self.rew_scales["knee_pos"] = self._task_cfg["env"]["learn"]["kneePosRewardScale"]
         self.min_body_height = self._task_cfg["env"]["learn"]["min_body_height"]
+
 
         # command ranges
         self.command_x_range = self._task_cfg["env"]["randomCommandVelocityRanges"]["linear_x"]
@@ -101,7 +128,7 @@ class Go1HorizontalTask(RLTask):
         self._num_envs = self._task_cfg["env"]["numEnvs"]
         self._go1_translation = torch.tensor([0.0, 0.0, 0.4])
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 44
+        self._num_observations = 38 #44
         self._num_actions = 12
 
         RLTask.__init__(self, name, env)
@@ -120,7 +147,6 @@ class Go1HorizontalTask(RLTask):
     def get_go1(self):
         go1 = Go1(prim_path=self.default_zero_env_path + "/go1", name="Go1", translation=self._go1_translation, usd_path="/isaac-sim/OmniIsaacGymEnvs/omniisaacgymenvs/USD/go1.usd")
         self._sim_config.apply_articulation_settings("Go1", get_prim_at_path(go1.prim_path), self._sim_config.parse_actor_config("Go1"))
-
         # Configure joint properties
         #for quadrant in ["FL", "RL", "FR", "RR"]:
         #    set_drive(f"{go1.prim_path}/trunk/{quadrant}_hip_joint", "angular", "position", 0, self.Kp, self.Kd, 23.7)
@@ -149,6 +175,7 @@ class Go1HorizontalTask(RLTask):
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity) * self.ang_vel_scale
         projected_gravity = quat_rotate(torso_rotation, self.gravity_vec)
         dof_pos_scaled = (dof_pos - self.default_dof_pos) * self.dof_pos_scale
+        eular_xy= torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,:2]
 
         commands_scaled = self.commands * torch.tensor(
             [self.lin_vel_scale, self.ang_vel_scale],
@@ -159,12 +186,13 @@ class Go1HorizontalTask(RLTask):
         obs = torch.cat(
             (
                 #base_lin_vel,
-                base_ang_vel,
-                projected_gravity,
-                commands_scaled,
-                dof_pos_scaled,
-                dof_vel * self.dof_vel_scale,
-                self.actions,
+                # base_ang_vel,
+                # projected_gravity,
+                # commands_scaled, #12
+                eular_xy, #2
+                dof_pos_scaled, #12
+                dof_vel * self.dof_vel_scale, #12
+                self.actions,  #12
             ),
             dim=-1,
         )
@@ -208,13 +236,14 @@ class Go1HorizontalTask(RLTask):
         self._go1s.set_world_poses(self.initial_root_pos[env_ids].clone(), self.initial_root_rot[env_ids].clone(), indices)
         self._go1s.set_velocities(root_vel, indices)
 
-        self.commands_x[env_ids] = torch_rand_float(
-            self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
-        ).squeeze()
-
-        self.commands_yaw[env_ids] = torch_rand_float(
-            self.command_yaw_range[0], self.command_yaw_range[1], (num_resets, 1), device=self._device
-        ).squeeze()
+        # self.commands_x[env_ids] = torch_rand_float(
+        #     self.command_x_range[0], self.command_x_range[1], (num_resets, 1), device=self._device
+        # ).squeeze()
+        self.commands_x[env_ids] = 0.6 ##required speed
+        # self.commands_yaw[env_ids] = torch_rand_float(
+        #     self.command_yaw_range[0], self.command_yaw_range[1], (num_resets, 1), device=self._device
+        # ).squeeze()
+        self.commands_yaw[env_ids] = 0.0
 
         # bookkeeping
         self.reset_buf[env_ids] = 0
@@ -267,27 +296,32 @@ class Go1HorizontalTask(RLTask):
 
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity)
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
-
+ 
         # velocity tracking reward
         lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 0])
         ang_vel_error = torch.square(self.commands[:, 1] - base_ang_vel[:, 2])
         rew_lin_vel_xy = torch.exp(-lin_vel_error / 0.25) * self.rew_scales["lin_vel_xy"]
         rew_ang_vel_z = torch.exp(-ang_vel_error / 0.25) * self.rew_scales["ang_vel_z"]
-
+        # print(dof_pos[:, 0:4].mean(dim=1),base_lin_vel[:, 0])
         rew_lin_vel_z = torch.square(base_lin_vel[:, 2]) * self.rew_scales["lin_vel_z"]
         rew_joint_acc = torch.sum(torch.square(self.last_dof_vel - dof_vel), dim=1) * self.rew_scales["joint_acc"]
         rew_action_rate = torch.sum(torch.square(self.last_actions - self.actions), dim=1) * self.rew_scales["action_rate"]
         rew_cosmetic = torch.sum(torch.abs(dof_pos[:, 0:4] - self.default_dof_pos[:, 0:4]), dim=1) * self.rew_scales["cosmetic"]
         rew_body_cosmetic = torch.sum(torch.abs(torso_rotation[:, 1:3]), dim=1) * self.rew_scales["body_cosmetic"]
 
-        total_reward = rew_lin_vel_z + rew_lin_vel_xy + rew_ang_vel_z + rew_joint_acc  + rew_action_rate + rew_cosmetic + rew_body_cosmetic
+        #knee
+        target_angle=-0.18 ##0.2max0.35
+        knee_angles_error = dof_pos[:, 0:4] - torch.tensor([target_angle, -target_angle, target_angle, -target_angle], device=dof_pos.device)
+        rew_knee_pos = torch.sum(torch.square(knee_angles_error), dim=1) * self.rew_scales["knee_pos"]
+
+        total_reward = rew_lin_vel_xy + rew_joint_acc  + rew_action_rate +  rew_knee_pos + rew_cosmetic + rew_body_cosmetic
+
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
-
-        self.fallen_over = self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
-
+        # self.fallen_over=self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
+        self.fallen_over= self._go1s.is_knee_under_line(threshold=0.2)|self._go1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 

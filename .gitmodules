@@ -1,0 +1,12 @@
+[submodule "unitree_ws/src/unitree_guide"]
+	path = unitree_ws/src/unitree_guide
+	url = https://github.com/unitreerobotics/unitree_guide
+[submodule "unitree_ws/src/unitree_ros"]
+	path = unitree_ws/src/unitree_ros
+	url = https://github.com/unitreerobotics/unitree_ros
+[submodule "unitree_ws/src/unitree_ros_to_real"]
+	path = unitree_ws/src/unitree_ros_to_real
+	url = https://github.com/unitreerobotics/unitree_ros_to_real
+[submodule "OmniIsaacGymEnvs/unitree_ws/src/unitree_legged_sdk"]
+	path = OmniIsaacGymEnvs/unitree_ws/src/unitree_legged_sdk
+	url = git@github.com:unitreerobotics/unitree_legged_sdk.git
