@@ -47,20 +47,7 @@ class BBView(RigidPrimView):
             reset_xform_properties=False
         )
 
-        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/bb", name="base_bb_view", reset_xform_properties=False)
+        self._base = RigidPrimView(prim_paths_expr="/World/envs/.*/bb", 
+                                name="base_bb_view", 
+                                reset_xform_properties=False)
 
-    def get_knee_transforms(self):
-        return self._knees.get_world_poses()
-
-    def is_knee_below_threshold(self, threshold, ground_heights=None):
-        knee_pos, _ = self._knees.get_world_poses()
-        knee_heights = knee_pos.view((-1, 4, 3))[:, :, 2]
-        if ground_heights is not None:
-            knee_heights -= ground_heights
-        return (knee_heights[:, 0] < threshold) | (knee_heights[:, 1] < threshold) | (knee_heights[:, 2] < threshold) | (knee_heights[:, 3] < threshold)
-
-    def is_base_below_threshold(self, threshold, ground_heights):
-        base_pos, _ = self.get_world_poses()
-        base_heights = base_pos[:, 2]
-        base_heights -= ground_heights
-        return (base_heights[:] < threshold)

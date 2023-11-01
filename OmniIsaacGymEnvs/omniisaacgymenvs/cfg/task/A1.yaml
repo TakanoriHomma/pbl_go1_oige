@@ -4,7 +4,7 @@ name: A1
 physics_engine: ${..physics_engine}
 
 env:
-  numEnvs: ${resolve_default:128,${...num_envs}}
+  numEnvs: ${resolve_default:256,${...num_envs}}
   envSpacing: 4.  # [m]
 
   clipObservations: 5.0
@@ -13,8 +13,11 @@ env:
   controlFrequencyInv: 3 # 33Hz
 
   baseInitState:
-    pos: [0.0, 0.0, 0.4] # x,y,z [m]
-    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
+    pos: [0.0, 0.0, 1.4] # x,y,z [m]
+    rot: [1.0, 0.0, 0.0, 0.0] # w,x,y,z  [quat] 
+    # rot: [0.70, 0.0, 0.0, 0.70] # w,x,y,z  [quat] 
+    # rot: [0.70, 0.0, 0.0, -0.70] # w,x,y,z  [quat] 
+    # [1.0, 0.0, 0.0, 0.0] default -> 0.0, [0.70, 0.0, 0.0, 0.70] yaw 90 -> 1.57, [0.70, 0.0, 0.0, -0.70] yaw -90 -> -1.57
     vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
     vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
 

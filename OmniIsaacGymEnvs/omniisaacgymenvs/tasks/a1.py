@@ -29,6 +29,8 @@
 from omniisaacgymenvs.tasks.base.rl_task import RLTask
 from omniisaacgymenvs.robots.articulations.a1 import A1
 from omniisaacgymenvs.robots.articulations.views.a1_view import A1View
+from omniisaacgymenvs.robots.articulations.bb import BB
+from omniisaacgymenvs.robots.articulations.views.bb_view import BBView
 from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
 
 from omni.isaac.core.utils.prims import get_prim_at_path
@@ -127,8 +129,10 @@ class A1Task(RLTask):
 
         self._num_envs = self._task_cfg["env"]["numEnvs"]
         self._a1_translation = torch.tensor([0.0, 0.0, 0.4])
+        self._bb_translation = torch.tensor([0.0, 0.0, 0.4])
+        self._a1_rot = rot
         self._env_spacing = self._task_cfg["env"]["envSpacing"]
-        self._num_observations = 38 #44
+        self._num_observations = 39 #44
         self._num_actions = 12
 
         RLTask.__init__(self, name, env)
@@ -138,14 +142,17 @@ class A1Task(RLTask):
         self.get_a1()
         super().set_up_scene(scene)
         self._a1s = A1View(prim_paths_expr="/World/envs/.*/A1", name="A1view")
+        # self._bbs = BBView(prim_paths_expr="/World/envs/.*/bb", name="BBview")
         scene.add(self._a1s)
         scene.add(self._a1s._base)
         scene.add(self._a1s._knees)
+        # scene.add(self._bbs)
+        # scene.add(self._bbs._base)
 
         return
 
     def get_a1(self):
-        self._a1 = A1(prim_path=self.default_zero_env_path + "/A1", name="A1", translation=self._a1_translation)
+        self._a1 = A1(prim_path=self.default_zero_env_path + "/A1", name="A1", translation=self._a1_translation,orientation=self._a1_rot)
         self._sim_config.apply_articulation_settings("A1", get_prim_at_path(self._a1.prim_path), self._sim_config.parse_actor_config("A1"))
         # Configure joint properties
         #for quadrant in ["FL", "RL", "FR", "RR"]:
@@ -179,7 +186,14 @@ class A1Task(RLTask):
             print(name)
             angle = self.named_default_joint_angles[name]
             self.default_dof_pos[:, i] = angle
-
+            
+        # self._bb = BB(prim_path=self.default_zero_env_path + "/bb", 
+        #             name="BB", 
+        #             translation=self._bb_translation, 
+        #             usd_path="/isaac-sim/OmniIsaacGymEnvs/omniisaacgymenvs/USD/bb.usd")
+        
+        # self._sim_config.apply_articulation_settings("BB", get_prim_at_path(self._bb.prim_path), self._sim_config.parse_actor_config("BB"))
+        
     def get_observations(self) -> dict:
         torso_position, torso_rotation = self._a1s.get_world_poses(clone=False)
         root_velocities = self._a1s.get_velocities(clone=False)
@@ -200,17 +214,24 @@ class A1Task(RLTask):
             requires_grad=False,
             device=self.commands.device,
         )
-
+        
+        # print(torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,2:3])
+        # print(torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,:3])
+        # print(torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,:2])
+        theta = torch.stack(quaternion_to_euler(torso_rotation), dim=-1)[:,2:3] # radian
+        # print(theta)
+        
         obs = torch.cat(
             (
                 #base_lin_vel,
                 # base_ang_vel,
                 # projected_gravity,
-                # commands_scaled, #12
-                eular_xy, #2
-                dof_pos_scaled, #12
-                dof_vel * self.dof_vel_scale, #12
-                self.actions,  #12
+                # commands_scaled, # 12
+                eular_xy, # 2
+                theta, # 1
+                dof_pos_scaled, # 12
+                dof_vel * self.dof_vel_scale, # 12
+                self.actions,  # 12
             ),
             dim=-1,
         )
@@ -314,6 +335,16 @@ class A1Task(RLTask):
 
         base_lin_vel = quat_rotate_inverse(torso_rotation, velocity)
         base_ang_vel = quat_rotate_inverse(torso_rotation, ang_velocity)
+
+        obs = self.get_observations()
+        # print(obs)
+        tensor_data = obs['A1view']['obs_buf']  # 'A1view'キーの下にある'obs_buf'キーからtensorを取得
+        # third_element = tensor_data[0, 2].item()  # 3つめの要素を取得
+        # third_element = tensor_data[:,2:3]  # 3つめの要素を取得
+        yaw = tensor_data[:,2]  # 3つめの要素を取得
+        # print(tensor_data)
+        # print("1", third_element)
+        # print("2", third_element2)
  
         # velocity tracking reward
         lin_vel_error = torch.square(self.commands[:, 0] - base_lin_vel[:, 0])
@@ -332,14 +363,22 @@ class A1Task(RLTask):
         knee_angles_error = dof_pos[:, 0:4] - torch.tensor([target_angle, -target_angle, target_angle, -target_angle], device=dof_pos.device)
         rew_knee_pos = torch.sum(torch.square(knee_angles_error), dim=1) * self.rew_scales["knee_pos"]
 
-        total_reward = rew_lin_vel_xy + rew_joint_acc  + rew_action_rate +  rew_knee_pos + rew_cosmetic + rew_body_cosmetic
+        # direction
+        # print("direction", yaw)
+        # print("rew knee pos", rew_knee_pos)
+        scale_rew_direction = 0.0001
+        rew_direction = torch.square(torch.pi - torch.abs(yaw)) * scale_rew_direction
+        # print("direction", rew_direction)
+        # print("knee pos", rew_knee_pos)
+        
+        total_reward = rew_lin_vel_xy + rew_joint_acc  + rew_action_rate +  rew_knee_pos + rew_cosmetic + rew_body_cosmetic + rew_direction 
 
         total_reward = torch.clip(total_reward, 0.0, None)
 
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = dof_vel[:]
         # self.fallen_over=self._a1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
-        self.fallen_over= self._a1s.is_knee_under_line(threshold=0.2)|self._a1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
+        self.fallen_over= self._a1s.is_knee_under_line(threshold=0.4)|self._a1s.is_base_below_threshold(threshold=self.min_body_height, ground_heights=0.0)
         total_reward[torch.nonzero(self.fallen_over)] = -1
         self.rew_buf[:] = total_reward.detach()
 

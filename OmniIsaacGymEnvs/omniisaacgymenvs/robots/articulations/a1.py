@@ -30,7 +30,8 @@ from typing import Optional
 import numpy as np
 import torch
 from omni.isaac.core.prims import RigidPrimView
-from omni.isaac.quadruped.robots import Unitree
+# from omni.isaac.quadruped.robots import Unitree
+from omni.isaac.core.robots.robot import Robot
 from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.core.utils.stage import add_reference_to_stage
 from omniisaacgymenvs.utils.usd_utils.create_instanceable_assets import convert_asset_instanceable
@@ -41,7 +42,7 @@ import torch
 
 from pxr import PhysxSchema
 
-class A1(Unitree):
+class A1(Robot):
     def __init__(
         self,
         prim_path: str,
@@ -77,30 +78,30 @@ class A1(Unitree):
             # articulation_controller=None,
         )
 
-        # self._dof_names = ["RR_hip",
-        #                    "RL_hip",
-        #                    "FL_hip",
-        #                    "FR_hip",
-        #                    "FL_thigh",
-        #                    "FR_thigh",
-        #                    "RL_thigh",
-        #                    "RR_thigh",
-        #                    "FL_calf",
-        #                    "RL_calf",
-        #                    "FR_calf",
-        #                    "RR_calf"]
-        self._dof_names = ["FL_hip",
-                            "FR_hip",
-                            "RL_hip",
-                            "RR_hip",
-                            "FL_thigh",
-                            "FR_thigh",
-                            "RL_thigh",
-                            "RR_thigh",
-                            "FL_calf",
-                            "FR_calf",
-                            "RL_calf",
-                            "RR_calf"]
+        self._dof_names = ["RR_hip",
+                           "RL_hip",
+                           "FL_hip",
+                           "FR_hip",
+                           "FL_thigh",
+                           "FR_thigh",
+                           "RL_thigh",
+                           "RR_thigh",
+                           "FL_calf",
+                           "RL_calf",
+                           "FR_calf",
+                           "RR_calf"]
+        # self._dof_names = ["FL_hip",
+        #                     "FR_hip",
+        #                     "RL_hip",
+        #                     "RR_hip",
+        #                     "FL_thigh",
+        #                     "FR_thigh",
+        #                     "RL_thigh",
+        #                     "RR_thigh",
+        #                     "FL_calf",
+        #                     "FR_calf",
+        #                     "RL_calf",
+        #                     "RR_calf"]
         
 
 
